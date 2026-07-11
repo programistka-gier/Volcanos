@@ -1,0 +1,17 @@
+# Środowisko wirtualne
+venv/
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Surowe dane (duże pliki JSON z API — są odtwarzalne przez notebook)
+raw/
+
+# Mac
+.DS_Store
