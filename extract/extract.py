@@ -24,4 +24,30 @@ def extract_volcanoes_from_eonet():
         raise #wyrzuca wyjatek wyzej do pipeline.py
     except requests.exceptions.ConnectionError:
         logging.error("No network connection")
-         raise
+        raise
+
+def extract_volcanoes_from_noaa():
+    """
+    Extracts volcano events from NOAA NGDC API.
+    Returns a list of volcano events.
+    """
+    url = config.NOAA_NGDC
+    volcanoes = []
+    try:
+        pure_response = requests.get(url)
+        pure_response.raise_for_status()
+        last_page = pure_response.json()['totalPages']
+        for page_index in range(1, last_page+1):
+            response = requests.get(url, params={'page': page_index, 'pageSize': config.NOAA_PAGE_SIZE})
+            response.raise_for_status()
+            volcanoes.extend(response.json()['items'])
+    except requests.exceptions.Timeout:
+        logging.error("NOAA NGDC API timed out — retrying later")
+        raise
+    except requests.exceptions.ConnectionError:
+        logging.error("No network connection")
+        raise
+    
+    return volcanoes
+    
+
