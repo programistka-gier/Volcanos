@@ -1,3 +1,10 @@
+from pathlib import Path
+
+RAW_DIR = Path("data/raw")
+CLEAN_DIR = Path("data/clean")
+EONET_FILENAME = "eonet_volcanoes.json"
+NOAA_FILENAME = "noaa_volcanoes.json"
+
 NASA_EONET = 'https://eonet.gsfc.nasa.gov/api/v3/events'
 NOAA_NGDC = 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/volcanoes'
 EONET_CATEGORY = 'volcanoes'
