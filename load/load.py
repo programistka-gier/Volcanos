@@ -1,18 +1,19 @@
 import json
+
+from config import RAW_DIR, RAW_NOAA_EARTHQUAKES_FILENAME, RAW_NOAA_VOLCANOES_FILENAME
 from extract import extract
-from config import RAW_DIR, EONET_FILENAME, NOAA_FILENAME
 
 
-def load_eonet():
-    """Load data from EONET and save to raw file."""
-    data = extract.extract_volcanoes_from_eonet()
-    save_to_file(data, EONET_FILENAME)
+def load_noaa_eathquakes():
+    """Load earthquakes data from NOAA and save to raw file."""
+    data = extract.extract_earthquakes_from_noaa()
+    save_to_file(data, RAW_NOAA_EARTHQUAKES_FILENAME)
 
 
-def load_noaa():
-    """Load data from NOAA and save to raw file."""
+def load_noaa_volcanoes():
+    """Load volcanoes data from NOAA and save to raw file."""
     data = extract.extract_volcanoes_from_noaa()
-    save_to_file(data, NOAA_FILENAME)
+    save_to_file(data, RAW_NOAA_VOLCANOES_FILENAME)
 
 
 def save_to_file(data, filename):

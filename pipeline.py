@@ -1,5 +1,5 @@
-from load.load import load_eonet, load_noaa
+from load.load import load_noaa_eathquakes, load_noaa_volcanoes
 
 if __name__ == "__main__":
-    load_eonet()
-    load_noaa()
+    load_noaa_eathquakes()
+    load_noaa_volcanoes()

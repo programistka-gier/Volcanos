@@ -1,8 +1,19 @@
-import pandas as pd
 import logging
-from config import RAW_DIR, EONET_FILENAME, NOAA_FILENAME, CLEAN_DIR, CLEAN_NOAA_FILENAME, CLEAN_EONET_FILENAME
 
-NOAA_COLUMN_MAP = {
+import pandas as pd
+
+from config import (
+    CLEAN_DIR,
+    CLEAN_NOAA_EARTHQUAKES_FILENAME,
+    CLEAN_NOAA_VOLCANOES_FILENAME,
+    RAW_DIR,
+    RAW_NOAA_EARTHQUAKES_FILENAME,
+    RAW_NOAA_VOLCANOES_FILENAME,
+)
+
+logger = logging.getLogger(__name__)
+
+NOAA_VOLCANOES_COLUMN_MAP = {
     "year": "year",
     "month": "month",
     "day": "day",
@@ -17,25 +28,33 @@ NOAA_COLUMN_MAP = {
     "significant": "significant",
 }
 
+
 def transform_noaa() -> pd.DataFrame:
     """Clean raw NOAA eruption data and return the Silver-layer DataFrame."""
-    df = data_check(RAW_DIR/NOAA_FILENAME)
+    df = load_raw(RAW_DIR / RAW_NOAA_VOLCANOES_FILENAME)
 
-    #save only important columns
-    df = df[list(NOAA_COLUMN_MAP)].rename(columns=NOAA_COLUMN_MAP)
+    # save only important columns
+    df = df[list(NOAA_VOLCANOES_COLUMN_MAP)].rename(columns=NOAA_VOLCANOES_COLUMN_MAP)
 
+    # clearing NaN and set type
     df["deaths_total"] = df["deaths_total"].fillna(0).astype(int)
     df["vei"] = df["vei"].fillna(-1).astype(int)
+
+    # clear duplicates and reset index
+    df = df.drop_duplicates().reset_index(drop=True)
+
+    logger.info(f"Silver shape for NOAA: {df.shape}")
     return df
 
 
+def transform_noaa_earthquakes() -> pd.DataFrame:
+    """Clean raw EONET eruption data and return the Silver-layer DataFrame."""
+    df = load_raw(RAW_DIR / RAW_NOAA_EARTHQUAKES_FILENAME)
 
-def check_eonet():
-    """Check eonet info, shape and null"""
-    data_check(RAW_DIR/EONET_FILENAME)
+    return df
 
 
-def data_check(path) -> pd.DataFrame:
+def load_raw(path) -> pd.DataFrame:
     df = pd.read_json(path)
-    logging.info(f"Raw shape for {path}: {df.shape}")
+    logger.info(f"Raw shape for {path}: {df.shape}")
     return df

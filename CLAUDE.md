@@ -47,16 +47,30 @@ config.py             — stałe: URL-e API, limity, ścieżki (Path)
 ## Stan projektu (bieżąco aktualizować)
 - `extract/extract.py` — ✅ gotowe (EONET + NOAA z paginacją, error handling)
 - `load/load.py` — ✅ gotowe (save_to_file, RAW_DIR z configu, mkdir)
-- `config.py` — ✅ gotowe (URL-e, limity, RAW_DIR, CLEAN_DIR, EONET_FILENAME, NOAA_FILENAME)
-- `pipeline.py` — ✅ minimalna wersja (load_eonet + load_noaa, guard `__main__`)
+- `config.py` — ✅ gotowe (URL-e, limity, RAW_DIR, CLEAN_DIR, EONET_FILENAME, NOAA_FILENAME,
+  CLEAN_NOAA_FILENAME, CLEAN_EONET_FILENAME)
+- `pipeline.py` — ✅ gotowe dla Bronze (load_eonet + load_noaa, guard `__main__`);
+  transform jeszcze niewpięty
 - `transform/transform.py` — 🟡 w toku:
-  - ma `data_check()` / `check_noaa()` / `check_eonet()` — eksploracja
-  - BUG: ma `if __name__ == "__main__"` — do usunięcia (narusza konwencje)
-  - brak `transform_noaa()`, `transform_eonet()`, `save_to_clean()`
+  - `if __name__ == "__main__"` usunięty ✅
+  - `load_raw(path)` — helper wczytujący JSON + logujący shape (dawne `data_check`) ✅
+  - `NOAA_COLUMN_MAP` (selekcja + rename w jednym słowniku) ✅
+  - `transform_noaa()` — ✅ gotowe: sygnatura z type hint + docstring, selekcja/rename,
+    obsługa nulli (`fillna` + `astype` dla `vei` i `deaths_total`), `drop_duplicates()`,
+    `reset_index(drop=True)`, log shape. Świadoma decyzja: 12 kolumn zamiast 13 —
+    `location` pominięta, `country` wystarcza do analiz.
+  - `transform_eonet()` — 🟡 zaczęte: ma sygnaturę i `load_raw()`, ale docstring skopiowany
+    ze starej funkcji (nieaktualny) i brak właściwej logiki (flatten geometry, is_active,
+    parse daty, selekcja kolumn)
+  - `save_to_clean()` — nie zaczęte
+- Formatter: Ruff skonfigurowany w `.vscode/settings.json` (`editor.defaultFormatter` +
+  `editor.formatOnSave` dla `[python]`) — grupuje/sortuje importy (stdlib → third-party →
+  lokalne), to zamierzone zachowanie.
 - `tests/` — ○ nie zaczęte
 - `notebooks/` — dwa pliki (szkic autorki + wygenerowany przez Claude). Nie uruchamiać bez prośby.
 - `README.md` — nieaktualny (stara struktura). Do zaktualizowania po Silver Layer.
-- `PROJECT_ROADMAP.html` — ✅ szczegółowa roadmapa z mikrokrokami, zapamiętuje checkboxy.
+- `PROJECT_ROADMAP.html` — ✅ szczegółowa roadmapa z mikrokrokami, zapamiętuje checkboxy
+  (localStorage + stan w samym HTML). Zaktualizowana na bieżąco.
 
 ## Konwencje pandas (Silver Layer)
 - Kolumny: snake_case (rename z camelCase z API)
@@ -70,11 +84,9 @@ config.py             — stałe: URL-e API, limity, ścieżki (Path)
 - Logowanie shape przed i po transformacji: `logging.info(f"shape: {df.shape}")`
 
 ## Do zrobienia dalej
-1. Usuń `if __name__ == "__main__"` z `transform/transform.py`
-2. Dodaj `CLEAN_NOAA_FILENAME`, `CLEAN_EONET_FILENAME` do `config.py`
-3. Napisz `transform_noaa()` — 13 kolumn z 43, nulle, typy, deduplikacja
-4. Napisz `transform_eonet()` — flatten geometry, apply lambda, to_datetime, is_active
-5. Napisz `save_to_clean()` — to_parquet(index=False)
-6. Wpięcie transform do `pipeline.py`
-7. Testy pytest z zamockowanym requests.get
-8. Aktualizacja README
+1. Popraw docstring `transform_eonet()` (obecnie skopiowany ze starej funkcji, nieaktualny)
+2. Dokończ `transform_eonet()` — flatten geometry, apply lambda, to_datetime, is_active
+3. Napisz `save_to_clean()` — to_parquet(index=False)
+4. Wpięcie transform do `pipeline.py`
+5. Testy pytest z zamockowanym requests.get
+6. Aktualizacja README
