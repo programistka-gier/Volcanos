@@ -10,8 +10,9 @@ __pycache__/
 # Jupyter
 .ipynb_checkpoints/
 
-# Surowe dane (duże pliki JSON z API — są odtwarzalne przez notebook)
-raw/
+# Dane (Bronze/Silver/Gold — odtwarzalne przez pipeline.py, nie commitujemy)
+data/
+*.parquet
 
 # Mac
 .DS_Store
