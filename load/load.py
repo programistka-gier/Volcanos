@@ -4,7 +4,7 @@ from config import RAW_DIR, RAW_NOAA_EARTHQUAKES_FILENAME, RAW_NOAA_VOLCANOES_FI
 from extract import extract
 
 
-def load_noaa_eathquakes():
+def load_noaa_earthquakes():
     """Load earthquakes data from NOAA and save to raw file."""
     data = extract.extract_earthquakes_from_noaa()
     save_to_file(data, RAW_NOAA_EARTHQUAKES_FILENAME)

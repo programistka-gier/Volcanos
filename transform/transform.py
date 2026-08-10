@@ -29,7 +29,7 @@ NOAA_VOLCANOES_COLUMN_MAP = {
 }
 
 
-def transform_noaa() -> pd.DataFrame:
+def transform_noaa_volcanoes() -> pd.DataFrame:
     """Clean raw NOAA eruption data and return the Silver-layer DataFrame."""
     df = load_raw(RAW_DIR / RAW_NOAA_VOLCANOES_FILENAME)
 
@@ -48,7 +48,7 @@ def transform_noaa() -> pd.DataFrame:
 
 
 def transform_noaa_earthquakes() -> pd.DataFrame:
-    """Clean raw EONET eruption data and return the Silver-layer DataFrame."""
+    """Clean raw NOAA earthquakes data and return the Silver-layer DataFrame."""
     df = load_raw(RAW_DIR / RAW_NOAA_EARTHQUAKES_FILENAME)
 
     return df
