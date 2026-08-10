@@ -1,7 +1,10 @@
 import json
+import logging
 
 from config import RAW_DIR, RAW_NOAA_EARTHQUAKES_FILENAME, RAW_NOAA_VOLCANOES_FILENAME
 from extract import extract
+
+logger = logging.getLogger(__name__)
 
 
 def load_noaa_earthquakes():
@@ -22,3 +25,4 @@ def save_to_file(data, filename):
     path = RAW_DIR / filename
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
+    logger.info(f"Saved {len(data)} record to {path}")

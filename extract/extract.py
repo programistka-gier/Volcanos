@@ -18,6 +18,8 @@ def extract_volcanoes_from_noaa():
         pure_response = requests.get(url)
         pure_response.raise_for_status()
         last_page = pure_response.json()["totalPages"]
+
+        logger.info("Fetching volcanoes from NOAA NGDC...")
         for page_index in range(1, last_page + 1):
             response = requests.get(
                 url, params={"page": page_index, "pageSize": config.NOAA_PAGE_SIZE}
@@ -31,6 +33,7 @@ def extract_volcanoes_from_noaa():
         logger.error("No network connection")
         raise
 
+    logger.info(f"Fetched {len(volcanoes)} volcanoes records")
     return volcanoes
 
 
@@ -45,6 +48,8 @@ def extract_earthquakes_from_noaa():
         pure_response = requests.get(url)
         pure_response.raise_for_status()
         last_page = pure_response.json()["totalPages"]
+
+        logger.info("Fetching earthquakes from NOAA NGDC...")
         for page_index in range(1, last_page + 1):
             response = requests.get(
                 url, params={"page": page_index, "pageSize": config.NOAA_PAGE_SIZE}
@@ -58,4 +63,5 @@ def extract_earthquakes_from_noaa():
         logger.error("No network connection")
         raise
 
+    logger.info(f"Fetched {len(earthquakes)} earthquakes records")
     return earthquakes
