@@ -4,5 +4,9 @@
         "venv/": true,
         "**/__pycache__/": true,
         "**/.ipynb_checkpoints/": true
+    },
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true
     }
 }
