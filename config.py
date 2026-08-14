@@ -1,7 +1,9 @@
 from pathlib import Path
 
-RAW_DIR = Path("data/raw")
-CLEAN_DIR = Path("data/clean")
+# folder, w którym leży config.py = root projektu
+BASE_DIR = Path(__file__).resolve().parent
+RAW_DIR = BASE_DIR / "data" / "raw"
+CLEAN_DIR = BASE_DIR / "data" / "clean"
 
 RAW_NOAA_VOLCANOES_FILENAME = "noaa_volcanoes.json"
 CLEAN_NOAA_VOLCANOES_FILENAME = "noaa_volcanoes_clean.parquet"

@@ -46,8 +46,14 @@ config.py             — stałe: URL-e API, limity, ścieżki (Path)
 ```
 
 ## Ustalone konwencje produkcyjne
-- **Config**: wszystkie ścieżki i stałe konfiguracyjne w `config.py`, ścieżki jako `pathlib.Path`
-  (np. `RAW_DIR = Path("data/raw")`), nie gołe stringi porozrzucane po modułach.
+- **Config**: wszystkie ścieżki i stałe konfiguracyjne w `config.py`, ścieżki jako `pathlib.Path`,
+  zakotwiczone względem lokalizacji samego pliku: `BASE_DIR = Path(__file__).resolve().parent`,
+  potem `RAW_DIR = BASE_DIR / "data" / "raw"`. Nie gołe względne stringi typu `Path("data/raw")` —
+  te zależą od cwd procesu, co psuje się w notebookach (inny cwd niż root). Ten sam wzorzec co
+  Django (`BASE_DIR` w `settings.py`).
+- **Separacja transform/save**: funkcje `transform_*()` tylko czyszczą i zwracają `pd.DataFrame`,
+  NIGDY nie zapisują na dysk. Zapis robi osobna funkcja `save_to_clean()`, wołana explicite
+  z `pipeline.py`. Dzięki temu `transform_*()` da się przetestować bez dotykania dysku.
 - **Ścieżki**: zawsze `pathlib`, nigdy f-string + `/` do sklejania ścieżek. Tworzenie folderów:
   `RAW_DIR.mkdir(parents=True, exist_ok=True)` przed zapisem.
 - **Importy**: jawne importy konkretnych funkcji (`from extract.extract import extract_x`) —
@@ -64,44 +70,55 @@ config.py             — stałe: URL-e API, limity, ścieżki (Path)
 
 ## Architektura Medallion (ustalone warstwy)
 - **Bronze** = `data/raw/` — surowe JSON z API, 1:1, nienaruszalne. Robi: `load.py`.
-- **Silver** = `data/clean/` — Parquet, oczyszczone, schematy egzekwowane. Robi: `transform.py` (w trakcie).
-- **Gold** = `data/gold/` — star schema, agregacje. Planowane.
+- **Silver** = `data/clean/` — Parquet, oczyszczone, schematy egzekwowane. Robi: `transform.py` — ✅ gotowe.
+- **Gold** = `data/gold/` — star schema, agregacje. Planowane (Faza 4, opcjonalna).
 
 ## Stan projektu (bieżąco aktualizować)
 - `extract/extract.py` — ✅ gotowe: `extract_volcanoes_from_noaa()` i `extract_earthquakes_from_noaa()`,
   oba z paginacją i error handling (Timeout/ConnectionError → log + raise). Brak EONET.
 - `load/load.py` — ✅ gotowe: `load_noaa_volcanoes()`, `load_noaa_earthquakes()`, `save_to_file()`
-  (RAW_DIR z configu, mkdir, indent=2). Literówka `load_noaa_eathquakes` poprawiona.
-- `config.py` — ✅ gotowe: `RAW_DIR`/`CLEAN_DIR`, `RAW_NOAA_VOLCANOES_FILENAME`/`CLEAN_NOAA_VOLCANOES_FILENAME`,
-  `RAW_NOAA_EARTHQUAKES_FILENAME`/`CLEAN_NOAA_EARTHQUAKES_FILENAME`, `NOAA_VOLCANOES`/`NOAA_EARTHQUAKES` (URL-e),
-  `NOAA_PAGE_SIZE`. Brak EONET.
-- `pipeline.py` — ✅ gotowe dla Bronze (`load_noaa_volcanoes()` + `load_noaa_earthquakes()`, guard `__main__`);
-  transform jeszcze niewpięty (roadmapa: zadanie t2-5)
-- `transform/transform.py` — 🟡 w toku:
-  - `if __name__ == "__main__"` usunięty ✅
-  - `load_raw(path)` — helper wczytujący JSON + logujący shape ✅
-  - `NOAA_VOLCANOES_COLUMN_MAP` (selekcja + rename w jednym słowniku) ✅
-  - `transform_noaa()` — ✅ gotowe: sygnatura z type hint + docstring, selekcja/rename,
-    obsługa nulli (`fillna` + `astype` dla `vei` i `deaths_total`), `drop_duplicates()`,
-    `reset_index(drop=True)`, log shape. Świadoma decyzja: 12 kolumn zamiast 13 —
-    `location` pominięta, `country` wystarcza do analiz.
-  - `transform_noaa_earthquakes()` — 🟡 zaczęte: ma sygnaturę i wczytuje raw, ale docstring
-    nadal mówi o EONET (nieaktualny, do poprawy) i brak logiki czyszczenia — selekcja/rename
-    kolumn (`NOAA_EARTHQUAKES_COLUMN_MAP`), `deaths_total` fillna+astype, `volcanoEventId`/
-    `tsunamiEventId` jako nullable `Int64` (NIE sentinel -1 — to FK, nie miara), dedup, reset_index
-  - `save_to_clean()` — nie zaczęte
+  (RAW_DIR z configu, mkdir, indent=2).
+- `config.py` — ✅ gotowe: `BASE_DIR = Path(__file__).resolve().parent` (odporne na cwd —
+  poprawka po buggu ze ścieżkami względnymi w notebooku), `RAW_DIR`/`CLEAN_DIR`,
+  `RAW_NOAA_VOLCANOES_FILENAME`/`CLEAN_NOAA_VOLCANOES_FILENAME`,
+  `RAW_NOAA_EARTHQUAKES_FILENAME`/`CLEAN_NOAA_EARTHQUAKES_FILENAME`, `NOAA_VOLCANOES`/`NOAA_EARTHQUAKES`
+  (URL-e), `NOAA_PAGE_SIZE`. Brak EONET.
+- `pipeline.py` — ✅ **gotowe end-to-end**: `load_noaa_earthquakes()` + `load_noaa_volcanoes()` (Bronze)
+  → `transform_noaa_volcanoes()`/`transform_noaa_earthquakes()` + `save_to_clean()` dla obu (Silver).
+  `logging.basicConfig()` na górze, jawne importy, guard `__main__`.
+- `transform/transform.py` — ✅ **gotowe**:
+  - `load_raw(path)` — helper wczytujący JSON + logujący shape
+  - `NOAA_VOLCANOES_COLUMN_MAP` / `NOAA_EARTHQUAKES_COLUMN_MAP` — selekcja + rename w jednym słowniku,
+    obie zawierają teraz `id` (świadomie — konsekwencja: zwykłe `drop_duplicates()` bez `subset` nigdy
+    nic nie usunie, bo `id` jest unikalne; zaakceptowane jako formalność)
+  - `transform_noaa_volcanoes()` — selekcja/rename, `vei.fillna(-1)`, `deaths_total.fillna(0)`,
+    oba `.astype(int)`, `earthquake_event_id` jako nullable `Int64` (FK do earthquakes), dedup+reset_index,
+    log shape. 12 kolumn świadomie (nie 13) — `location` pominięta.
+  - `transform_noaa_earthquakes()` — analogicznie: `deaths_total` z pola `deathsTotal` (nie `deaths`,
+    spójnie z volcanoes) fillna(0)+astype(int), `volcano_event_id` jako nullable `Int64` (NIE fillna
+    sentinelem — to FK), `month`/`day`/`latitude`/`longitude`/`magnitude` zostają NaN gdzie brak
+    (brak sensownego defaultu domenowego), dedup+reset_index, log shape
+  - `save_to_clean(df, filename)` — type hints, `CLEAN_DIR.mkdir()`, `to_parquet(index=False)`, log.
+    Wołana z `pipeline.py` z gołą nazwą pliku (stała z configu), NIE z `CLEAN_DIR / ...` —
+    wcześniej był tu bug (podwójne sklejenie ścieżki, przypadkiem "działający" przez to że pathlib
+    ignoruje lewy operand `/` gdy prawy jest absolutny) — naprawiony.
 - Formatter: Ruff skonfigurowany w `.vscode/settings.json` (`editor.defaultFormatter` +
   `editor.formatOnSave` dla `[python]`) — grupuje/sortuje importy (stdlib → third-party →
-  lokalne), to zamierzone zachowanie.
+  lokalne), to zamierzone zachowanie. Dodatkowo: `jupyter.notebookFileRoot: ${workspaceFolder}`
+  i `notebook.output.textLineLimit: 150` (VS Code czasem ignoruje pierwsze — patrz konwencja
+  `BASE_DIR` w configu jako właściwe zabezpieczenie).
 - `requirements.txt` — ✅ tylko runtime deps pipeline'u: `pandas==3.0.3`, `requests==2.34.2`
 - `requirements-dev.txt` — ✅ `-r requirements.txt` + Jupyter i jego zależności przechodnie
   (do pracy z notebookiem, nie potrzebne do `python pipeline.py`)
 - `.gitignore` — ✅ `data/` (całość: raw+clean+gold) i `*.parquet` zamiast samego `raw/`
 - `tests/` — ○ nie zaczęte
-- `notebooks/` — dwa pliki (szkic autorki + wygenerowany przez Claude). Nie uruchamiać bez prośby.
-- `README.md` — nieaktualny (stara struktura, wspomina EONET). Do zaktualizowania po Silver Layer.
-- `PROJECT_ROADMAP.html` — ✅ szczegółowa roadmapa z mikrokrokami, zapamiętuje checkboxy
-  (localStorage + stan w samym HTML). Zaktualizowana pod pivot EONET→earthquakes.
+- `notebooks/` — `test_transform.ipynb` (dev-loop do testowania funkcji z `transform.py` przeciw
+  zapisanym danym Bronze, bez odpalania pipeline.py). Stare `elt_volcanos.ipynb`/`volcano_elt.ipynb`
+  zostały usunięte (kiedyś, poza tą sesją) — nie ma ich już na dysku. Puste, osierocone
+  `notebooks/raw/`/`notebooks/clean/` — pozostałość po starym notebooku, do usunięcia.
+- `README.md` — nieaktualny (stara struktura, wspomina EONET). Do zaktualizowania.
+- `PROJECT_ROADMAP.html` — ✅ Faza 2 (Silver) na 6/7 — zostało tylko zadanie 2-6 (data quality
+  verification). Zapamiętuje checkboxy (localStorage + stan w samym HTML).
 
 ## Konwencje pandas (Silver Layer)
 - Kolumny: snake_case (rename z camelCase/mixedCase z API)
@@ -117,10 +134,9 @@ config.py             — stałe: URL-e API, limity, ścieżki (Path)
 - Selekcja + rename jednym słownikiem: `df[list(COLUMN_MAP)].rename(columns=COLUMN_MAP)`
 
 ## Do zrobienia dalej
-1. Popraw docstring `transform_noaa_earthquakes()` (nadal mówi o EONET, nieaktualny)
-2. Dokończ `transform_noaa_earthquakes()` — `NOAA_EARTHQUAKES_COLUMN_MAP`, fillna/astype dla
-   `deaths_total`, nullable `Int64` dla `volcanoEventId`/`tsunamiEventId`, dedup, reset_index, log shape
-3. Napisz `save_to_clean()` — to_parquet(index=False)
-4. Wpięcie transform do `pipeline.py`
-5. Testy pytest z zamockowanym requests.get
-6. Aktualizacja README (wspomina jeszcze EONET, starą strukturę folderów)
+1. Zadanie 2-6: weryfikacja Silver Layer (asserty data quality — brak NaN w wymaganych kolumnach,
+   zakresy VEI/współrzędnych, brak duplikatów)
+2. Testy pytest z zamockowanym `requests.get` (Faza 3)
+3. Usuń osierocone `notebooks/raw/`/`notebooks/clean/`
+4. Aktualizacja README (wspomina jeszcze EONET, starą strukturę folderów)
+5. (Opcjonalnie) Gold Layer — star schema (Faza 4)

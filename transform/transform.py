@@ -35,12 +35,11 @@ NOAA_EARTHQUAKES_COLUMN_MAP = {
     "year": "year",
     "month": "month",
     "day": "day",
-    "name": "name",
     "country": "country",
     "latitude": "latitude",
     "longitude": "longitude",
     "eqMagnitude": "magnitude",
-    "deaths": "deaths_total",
+    "deathsTotal": "deaths_total",
     "volcanoEventId": "volcano_event_id",
 }
 
@@ -55,11 +54,13 @@ def transform_noaa_volcanoes() -> pd.DataFrame:
     # clearing NaN and set type
     df["deaths_total"] = df["deaths_total"].fillna(0).astype(int)
     df["vei"] = df["vei"].fillna(-1).astype(int)
+    df["earthquake_event_id"] = df["earthquake_event_id"].astype("Int64")
 
     # clear duplicates and reset index
     df = df.drop_duplicates().reset_index(drop=True)
 
-    logger.info(f"Silver shape for NOAA: {df.shape}")
+    logger.info(f"Silver shape for NOAA volcanoes: {df.shape}")
+
     return df
 
 
@@ -71,6 +72,12 @@ def transform_noaa_earthquakes() -> pd.DataFrame:
         columns=NOAA_EARTHQUAKES_COLUMN_MAP
     )
 
+    df["deaths_total"] = df["deaths_total"].fillna(0).astype(int)
+    df["volcano_event_id"] = df["volcano_event_id"].astype("Int64")
+
+    df = df.drop_duplicates().reset_index(drop=True)
+    logger.info(f"Silver shape for NOAA earthquakes: {df.shape}")
+
     return df
 
 
@@ -78,3 +85,11 @@ def load_raw(path) -> pd.DataFrame:
     df = pd.read_json(path)
     logger.info(f"Raw shape for {path}: {df.shape}")
     return df
+
+
+def save_to_clean(df: pd.DataFrame, filename: str) -> None:
+    """Save data as PARQUET to data/clean/{filename}."""
+    CLEAN_DIR.mkdir(parents=True, exist_ok=True)
+    path = CLEAN_DIR / filename
+    df.to_parquet(path, index=False)
+    logger.info(f"Saved {len(df)} records to {path}")
