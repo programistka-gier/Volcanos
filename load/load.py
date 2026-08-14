@@ -1,6 +1,8 @@
 import json
 import logging
 
+import pandas as pd
+
 from config import RAW_DIR, RAW_NOAA_EARTHQUAKES_FILENAME, RAW_NOAA_VOLCANOES_FILENAME
 from extract import extract
 
@@ -26,3 +28,5 @@ def save_to_file(data, filename):
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
     logger.info(f"Saved {len(data)} record to {path}")
+    df = pd.read_json(path)
+    logger.info(f"Shape of {path}: \n {df.shape}")
