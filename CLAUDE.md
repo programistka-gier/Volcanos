@@ -116,9 +116,13 @@ config.py             — stałe: URL-e API, limity, ścieżki (Path)
   zapisanym danym Bronze, bez odpalania pipeline.py). Stare `elt_volcanos.ipynb`/`volcano_elt.ipynb`
   zostały usunięte (kiedyś, poza tą sesją) — nie ma ich już na dysku. Puste, osierocone
   `notebooks/raw/`/`notebooks/clean/` — pozostałość po starym notebooku, do usunięcia.
-- `README.md` — nieaktualny (stara struktura, wspomina EONET). Do zaktualizowania.
-- `PROJECT_ROADMAP.html` — ✅ Faza 2 (Silver) na 6/7 — zostało tylko zadanie 2-6 (data quality
-  verification). Zapamiętuje checkboxy (localStorage + stan w samym HTML).
+- `README.md` — ✅ zaktualizowany: nowa struktura, NOAA volcanoes+earthquakes (bez EONET),
+  opisany pivot EONET→earthquakes i powód, Medallion, decyzje o obsłudze null (sentinel vs
+  nullable Int64), poprawny URL repo (github.com/programistka-gier/Volcanos).
+- `PROJECT_ROADMAP.html` — ✅ Faza 2 (Silver) **ukończona 7/7** (data quality asserty w `pipeline.py`
+  po każdym `transform_*()` — różne wymagane kolumny dla volcanoes vs earthquakes, bo earthquakes
+  ma legalne braki w lat/lon). Faza 3 (testy) — aktualna. Zapamiętuje checkboxy (localStorage +
+  stan w samym HTML).
 
 ## Konwencje pandas (Silver Layer)
 - Kolumny: snake_case (rename z camelCase/mixedCase z API)
@@ -134,9 +138,6 @@ config.py             — stałe: URL-e API, limity, ścieżki (Path)
 - Selekcja + rename jednym słownikiem: `df[list(COLUMN_MAP)].rename(columns=COLUMN_MAP)`
 
 ## Do zrobienia dalej
-1. Zadanie 2-6: weryfikacja Silver Layer (asserty data quality — brak NaN w wymaganych kolumnach,
-   zakresy VEI/współrzędnych, brak duplikatów)
-2. Testy pytest z zamockowanym `requests.get` (Faza 3)
-3. Usuń osierocone `notebooks/raw/`/`notebooks/clean/`
-4. Aktualizacja README (wspomina jeszcze EONET, starą strukturę folderów)
-5. (Opcjonalnie) Gold Layer — star schema (Faza 4)
+1. Testy pytest z zamockowanym `requests.get` (Faza 3)
+2. Usuń osierocone `notebooks/raw/`/`notebooks/clean/`
+3. (Opcjonalnie) Gold Layer — star schema (Faza 4)

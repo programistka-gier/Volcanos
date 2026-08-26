@@ -120,4 +120,3 @@ cleans to Silver, runs data-quality checks, and writes Parquet. Modules inside `
 ## Status
 
 Bronze and Silver layers are complete and running end-to-end. Tests (pytest, mocked HTTP calls)
-and the optional Gold layer are in progress.

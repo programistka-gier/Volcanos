@@ -39,7 +39,7 @@ def extract_volcanoes_from_noaa():
 
 def extract_earthquakes_from_noaa():
     """
-    Extracts volcano events from NOAA NGDC API.
+    Extracts earthquake events from NOAA NGDC API.
     Returns a list of earthquakes events.
     """
     url = config.NOAA_EARTHQUAKES
