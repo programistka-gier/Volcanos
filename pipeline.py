@@ -2,6 +2,7 @@ import logging
 
 from config import CLEAN_NOAA_EARTHQUAKES_FILENAME, CLEAN_NOAA_VOLCANOES_FILENAME
 from load.load import load_noaa_earthquakes, load_noaa_volcanoes
+from transform.schemas import earthquakes_schema, volcanoes_schema
 from transform.transform import (
     save_to_clean,
     transform_noaa_earthquakes,
@@ -13,7 +14,11 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 if __name__ == "__main__":
     load_noaa_earthquakes()
     load_noaa_volcanoes()
+
     volcanoes = transform_noaa_volcanoes()
+    volcanoes_schema.validate(volcanoes, lazy=True)
     save_to_clean(volcanoes, CLEAN_NOAA_VOLCANOES_FILENAME)
+
     earthquakes = transform_noaa_earthquakes()
+    earthquakes_schema.validate(earthquakes, lazy=True)
     save_to_clean(earthquakes, CLEAN_NOAA_EARTHQUAKES_FILENAME)
