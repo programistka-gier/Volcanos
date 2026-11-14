@@ -113,9 +113,7 @@ config.py             — stałe: URL-e API, limity, ścieżki (Path)
 - `.gitignore` — ✅ `data/` (całość: raw+clean+gold) i `*.parquet` zamiast samego `raw/`
 - `tests/` — ○ nie zaczęte
 - `notebooks/` — `test_transform.ipynb` (dev-loop do testowania funkcji z `transform.py` przeciw
-  zapisanym danym Bronze, bez odpalania pipeline.py). Stare `elt_volcanos.ipynb`/`volcano_elt.ipynb`
-  zostały usunięte (kiedyś, poza tą sesją) — nie ma ich już na dysku. Puste, osierocone
-  `notebooks/raw/`/`notebooks/clean/` — pozostałość po starym notebooku, do usunięcia.
+  zapisanym danym Bronze, bez odpalania pipeline.py).
 - `README.md` — ✅ zaktualizowany: nowa struktura, NOAA volcanoes+earthquakes (bez EONET),
   opisany pivot EONET→earthquakes i powód, Medallion, decyzje o obsłudze null (sentinel vs
   nullable Int64), poprawny URL repo (github.com/programistka-gier/Volcanos).
@@ -139,5 +137,4 @@ config.py             — stałe: URL-e API, limity, ścieżki (Path)
 
 ## Do zrobienia dalej
 1. Testy pytest z zamockowanym `requests.get` (Faza 3)
-2. Usuń osierocone `notebooks/raw/`/`notebooks/clean/`
-3. (Opcjonalnie) Gold Layer — star schema (Faza 4)
+2. (Opcjonalnie) Gold Layer — star schema (Faza 4)

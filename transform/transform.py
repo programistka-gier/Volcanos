@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 NOAA_VOLCANOES_COLUMN_MAP = {
     "id": "id",
+    "volcanoLocationId": "volcano_location_id",
     "year": "year",
     "month": "month",
     "day": "day",
@@ -26,7 +27,6 @@ NOAA_VOLCANOES_COLUMN_MAP = {
     "morphology": "morphology",
     "vei": "vei",
     "deathsTotal": "deaths_total",
-    "significant": "significant",
     "earthquakeEventId": "earthquake_event_id",
 }
 
@@ -54,6 +54,8 @@ def transform_noaa_volcanoes() -> pd.DataFrame:
     # clearing NaN and set type
     df["deaths_total"] = df["deaths_total"].fillna(0).astype(int)
     df["vei"] = df["vei"].fillna(-1).astype(int)
+    df["month"] = df["month"].astype("Int64")
+    df["day"] = df["day"].astype("Int64")
     df["earthquake_event_id"] = df["earthquake_event_id"].astype("Int64")
 
     # clear duplicates and reset index
@@ -72,6 +74,15 @@ def transform_noaa_earthquakes() -> pd.DataFrame:
         columns=NOAA_EARTHQUAKES_COLUMN_MAP
     )
 
+    # NOAA's earthquakes endpoint returns country in ALL CAPS ("ITALY"),
+    # the volcanoes endpoint in Title Case ("Italy")
+    # normalize to Title Case
+    df["country"] = df["country"].str.title()
+    df["country"] = df["country"].replace(
+        {"Uk Territory": "UK Territory", "Usa Territory": "USA Territory"}
+    )
+    df["month"] = df["month"].astype("Int64")
+    df["day"] = df["day"].astype("Int64")
     df["deaths_total"] = df["deaths_total"].fillna(0).astype(int)
     df["volcano_event_id"] = df["volcano_event_id"].astype("Int64")
 

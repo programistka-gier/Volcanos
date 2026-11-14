@@ -1,3 +1,4 @@
+import argparse
 import logging
 
 from config import CLEAN_NOAA_EARTHQUAKES_FILENAME, CLEAN_NOAA_VOLCANOES_FILENAME
@@ -10,10 +11,24 @@ from transform.transform import (
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
-    load_noaa_earthquakes()
-    load_noaa_volcanoes()
+    parser = argparse.ArgumentParser(
+        description="Run Volcano ELT pipeline: extract, load and transform data from NOAA"
+    )
+    parser.add_argument(
+        "--skip-extract",
+        action="store_true",
+        help="Skip extraction from NOAA phase, use saved raw data.",
+    )
+    args = parser.parse_args()
+    if not args.skip_extract:
+        logger.info("Extracting data from NOAA.")
+        load_noaa_earthquakes()
+        load_noaa_volcanoes()
+    else:
+        logger.info("Skipped extraction, using data from data/raw")
 
     volcanoes = transform_noaa_volcanoes()
     volcanoes_schema.validate(volcanoes, lazy=True)
