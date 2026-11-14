@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volcano ELT — Project Roadmap</title>
+<style>
+  :root {
+    --bg:     #0d1117;
+    --bg2:    #161b22;
+    --bg3:    #1e2530;
+    --border: #2d333b;
+    --text:   #cdd9e5;
+    --text2:  #768390;
+    --accent: #539bf5;
+    --green:  #46954a;
+    --green-l: #57ab5a;
+    --yellow: #c69026;
+    --yellow-l: #daaa3f;
+    --red:    #e05c5c;
+    --purple: #986ee2;
+    --teal:   #39c5cf;
+    --orange: #cc6b2c;
+    --bronze: #b87333;
+    --silver: #8ba3c1;
+    --gold:   #c9a83a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system,'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; padding-bottom:80px; }
+
+  header { background:var(--bg2); border-bottom:1px solid var(--border); padding:28px 44px 24px; display:flex; align-items:flex-start; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  header h1 { font-size:1.4rem; font-weight:700; }
+  header .sub { color:var(--text2); font-size:0.82rem; margin-top:3px; }
+  .hbadges { display:flex; gap:7px; flex-wrap:wrap; margin-top:12px; }
+  .hb { padding:3px 9px; border-radius:20px; font-size:0.7rem; font-weight:700; border:1px solid; }
+  .hb-g { color:var(--green-l); border-color:var(--green); background:rgba(70,149,74,.1); }
+  .hb-y { color:var(--yellow-l); border-color:var(--yellow); background:rgba(198,144,38,.1); }
+  .hb-n { color:var(--text2); border-color:var(--border); background:var(--bg3); }
+  .pct { font-size:1.6rem; font-weight:700; color:var(--green-l); }
+  .pbar-outer { height:5px; border-radius:10px; background:var(--bg3); width:160px; margin-left:auto; }
+  .pbar-inner { height:100%; border-radius:10px; background:linear-gradient(90deg,var(--green),var(--teal)); }
+
+  /* PIPELINE STRIP */
+  .strip { background:var(--bg3); border-bottom:1px solid var(--border); padding:14px 44px; display:flex; align-items:center; overflow-x:auto; gap:0; font-size:0.75rem; }
+  .sn { display:flex; flex-direction:column; align-items:center; gap:3px; padding:0 14px; min-width:80px; flex-shrink:0; text-align:center; }
+  .sn-icon { font-size:1.2rem; }
+  .sn-name { font-weight:700; font-size:0.72rem; }
+  .sn-file { font-family:monospace; font-size:0.65rem; color:var(--text2); }
+  .sn.done .sn-name { color:var(--green-l); }
+  .sn.now  .sn-name { color:var(--yellow-l); }
+  .sn.todo .sn-icon { opacity:.35; }
+  .sn.todo .sn-name { color:var(--text2); }
+  .sarrow { color:var(--border); font-size:1rem; flex-shrink:0; }
+  .lpill { display:inline-block; padding:1px 6px; border-radius:10px; font-size:0.62rem; font-weight:700; margin-top:3px; }
+  .lp-b { background:rgba(184,115,51,.2); color:var(--bronze); }
+  .lp-s { background:rgba(139,163,193,.2); color:var(--silver); }
+  .lp-g { background:rgba(201,168,58,.2); color:var(--gold); }
+
+  /* QUICK NAV */
+  .qnav { display:flex; gap:5px; padding:10px 44px; background:var(--bg2); border-bottom:1px solid var(--border); overflow-x:auto; }
+  .qn { display:flex; align-items:center; gap:5px; padding:4px 10px; border-radius:6px; border:1px solid var(--border); font-size:0.7rem; color:var(--text2); cursor:pointer; white-space:nowrap; transition:all .15s; }
+  .qn:hover { border-color:var(--accent); color:var(--text); }
+  .dot { width:6px; height:6px; border-radius:50%; }
+
+  /* MAIN */
+  main { max-width:880px; margin:28px auto 0; padding:0 44px; }
+
+  /* PHASE */
+  .phase { margin-bottom:20px; }
+  .ph { display:flex; align-items:center; gap:10px; padding:13px 18px; background:var(--bg2); border:1px solid var(--border); border-radius:8px 8px 0 0; cursor:pointer; user-select:none; }
+  .phase.col .ph { border-radius:8px; }
+  .ph:hover { background:var(--bg3); }
+  .ph-icon { font-size:1rem; width:24px; text-align:center; }
+  .ph-title { font-weight:700; font-size:0.92rem; flex:1; }
+  .ph-meta { font-size:0.75rem; color:var(--text2); }
+  .ph-chev { font-size:0.6rem; color:var(--text2); transition:transform .2s; }
+  .phase.col .ph-chev { transform:rotate(-90deg); }
+  .ph-body { border:1px solid var(--border); border-top:none; border-radius:0 0 8px 8px; overflow:hidden; }
+  .phase.col .ph-body { display:none; }
+
+  /* TASK */
+  .task { border-bottom:1px solid var(--border); }
+  .task:last-child { border-bottom:none; }
+  .th { display:flex; align-items:flex-start; gap:11px; padding:13px 18px; cursor:pointer; }
+  .th:hover { background:rgba(255,255,255,.02); }
+  .task.now > .th { border-left:3px solid var(--yellow-l); padding-left:15px; }
+
+  /* checkbox */
+  .chk { width:17px; height:17px; border-radius:4px; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; cursor:pointer; transition:all .15s; font-size:0.6rem; color:transparent; }
+  .task.done .chk { background:var(--green); border-color:var(--green); color:#fff; }
+  .task.now  .chk { border-color:var(--yellow-l); }
+  .task.done .tname { text-decoration:line-through; color:var(--text2); }
+
+  .tmain { flex:1; }
+  .tname { font-weight:600; font-size:0.87rem; }
+  .tbrief { font-size:0.78rem; color:var(--text2); margin-top:2px; }
+  .ttags { display:flex; gap:4px; flex-wrap:wrap; margin-top:5px; }
+  .tag { font-size:0.65rem; font-weight:700; padding:1px 6px; border-radius:10px; border:1px solid; }
+  .tpandas { color:#4ec9b0; border-color:#4ec9b0; }
+  .tpython { color:#569cd6; border-color:#569cd6; }
+  .tconcept { color:var(--accent); border-color:var(--accent); }
+  .tde { color:var(--purple); border-color:var(--purple); }
+  .tfix { color:var(--red); border-color:var(--red); }
+  .ttest { color:var(--yellow-l); border-color:var(--yellow); }
+
+  .tchev { font-size:0.6rem; color:var(--text2); margin-top:3px; transition:transform .2s; }
+  .task.exp .tchev { transform:rotate(180deg); }
+
+  /* TASK BODY */
+  .tb { display:none; padding:0 18px 18px 46px; background:rgba(0,0,0,.12); }
+  .task.exp .tb { display:block; }
+
+  /* STEP LIST — the main content */
+  .steps { margin-top:14px; counter-reset:step; }
+  .step {
+    display:flex; gap:12px; margin-bottom:10px;
+    padding:10px 14px;
+    background:var(--bg2); border:1px solid var(--border); border-radius:7px;
+  }
+  .step-num {
+    counter-increment:step;
+    flex-shrink:0;
+    width:22px; height:22px; border-radius:50%;
+    background:var(--bg3); border:1px solid var(--border);
+    font-size:0.68rem; font-weight:700; color:var(--text2);
+    display:flex; align-items:center; justify-content:center;
+    margin-top:1px;
+  }
+  .step-body { flex:1; }
+  .step-action { font-size:0.84rem; font-weight:600; color:var(--text); }
+  .step-detail { font-size:0.78rem; color:var(--text2); margin-top:4px; line-height:1.65; }
+  .step.warn .step-num { background:rgba(224,92,92,.15); border-color:var(--red); color:var(--red); }
+  .step.warn .step-action { color:var(--red); }
+  .step.concept .step-num { background:rgba(83,155,245,.1); border-color:var(--accent); color:var(--accent); }
+  .step.concept .step-action { color:var(--accent); }
+
+  /* Section label inside task body */
+  .slabel { font-size:0.67rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text2); margin:14px 0 6px; padding-bottom:5px; border-bottom:1px solid var(--border); }
+
+  /* Code */
+  pre { background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:11px 13px; font-size:0.77rem; font-family:'Cascadia Code','Fira Code',monospace; overflow-x:auto; color:#cdd9e5; margin:7px 0; }
+  code { font-family:'Cascadia Code','Fira Code',monospace; font-size:0.81em; background:var(--bg3); padding:1px 5px; border-radius:3px; color:#c9a83a; }
+  .kw{color:#569cd6}.fn{color:#dcdcaa}.st{color:#ce9178}.cm{color:#6a9955}.py{color:#4ec9b0}.num{color:#b5cea8}
+
+  /* hint */
+  .hint-btn { margin-top:10px; padding:5px 11px; background:transparent; border:1px solid var(--border); border-radius:6px; color:var(--text2); font-size:0.76rem; cursor:pointer; transition:all .15s; }
+  .hint-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .hint-box { display:none; margin-top:7px; padding:10px 13px; background:rgba(83,155,245,.05); border:1px solid rgba(83,155,245,.2); border-radius:6px; font-size:0.79rem; color:var(--text2); line-height:1.7; }
+  .hint-box.vis { display:block; }
+
+  /* self-check */
+  .sc { margin-top:10px; padding:10px 13px; background:rgba(70,149,74,.05); border:1px solid rgba(70,149,74,.2); border-radius:6px; font-size:0.79rem; color:var(--text2); }
+  .sc-lbl { font-size:0.65rem; font-weight:700; color:var(--green-l); text-transform:uppercase; letter-spacing:.07em; margin-bottom:4px; }
+
+  /* warn box */
+  .warnbox { margin-top:10px; padding:10px 13px; background:rgba(224,92,92,.05); border:1px solid rgba(224,92,92,.25); border-radius:6px; font-size:0.79rem; color:#e07070; }
+
+  /* data table */
+  .dtable { width:100%; border-collapse:collapse; margin:8px 0; font-size:0.77rem; }
+  .dtable th { text-align:left; padding:6px 10px; background:var(--bg3); color:var(--text2); font-size:0.67rem; text-transform:uppercase; }
+  .dtable td { padding:6px 10px; border-bottom:1px solid var(--border); color:var(--text2); vertical-align:top; }
+  .dtable td:first-child { color:var(--text); font-family:monospace; font-weight:600; }
+  .dtable tr:last-child td { border-bottom:none; }
+  .null-hi { color:var(--red); }
+  .ok-hi { color:var(--green-l); }
+
+  footer { max-width:880px; margin:40px auto 0; padding:14px 44px; border-top:1px solid var(--border); font-size:0.73rem; color:var(--text2); }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🌋 Volcano ELT — Project Roadmap</h1>
+    <div class="sub">DE Journey · Weronika Ślusarczyk · Szczegółowy plan krok po kroku</div>
+    <div class="hbadges">
+      <span class="hb hb-g">Extract ✓</span>
+      <span class="hb hb-g">Load — Bronze ✓</span>
+      <span class="hb hb-g">Transform → Silver ✓</span>
+      <span class="hb hb-n">Tests ○</span>
+      <span class="hb hb-n">Gold Layer ○</span>
+      <span class="hb hb-n">README ○</span>
+    </div>
+  </div>
+  <div style="text-align:right">
+    <div style="font-size:.7rem;color:var(--text2);margin-bottom:5px">Ogólny postęp</div>
+    <div class="pbar-outer"><div class="pbar-inner" style="width:60%"></div></div>
+    <div class="pct">60%</div>
+  </div>
+</header>
+
+<div class="strip">
+  <div class="sn done"><div class="sn-icon">🌐</div><div class="sn-name">NOAA Volcanoes</div><div class="sn-file">900 records · 5 stron</div></div>
+  <div class="sarrow">+</div>
+  <div class="sn done"><div class="sn-icon">🌐</div><div class="sn-name">NOAA Earthquakes</div><div class="sn-file">6692 records · 34 strony</div></div>
+  <div class="sarrow">→</div>
+  <div class="sn done"><div class="sn-icon">📦</div><div class="sn-name">extract.py</div><div class="sn-file">extract/</div></div>
+  <div class="sarrow">→</div>
+  <div class="sn done"><div class="sn-icon">💾</div><div class="sn-name">load.py</div><div class="sn-file">load/</div><span class="lpill lp-b">Bronze</span></div>
+  <div class="sarrow">→</div>
+  <div class="sn done"><div class="sn-icon">⚙️</div><div class="sn-name">transform.py</div><div class="sn-file">transform/</div><span class="lpill lp-s">Silver</span></div>
+  <div class="sarrow">→</div>
+  <div class="sn todo"><div class="sn-icon">🏆</div><div class="sn-name">Gold Layer</div><div class="sn-file">star schema</div><span class="lpill lp-g">Gold</span></div>
+  <div class="sarrow">→</div>
+  <div class="sn now"><div class="sn-icon">🧪</div><div class="sn-name">pytest</div><div class="sn-file">tests/</div></div>
+</div>
+
+<div class="qnav">
+  <div class="qn" onclick="jump('ph1')"><div class="dot" style="background:var(--green-l)"></div>Faza 1: Extract + Load</div>
+  <div class="qn" onclick="jump('ph2')"><div class="dot" style="background:var(--green-l)"></div>Faza 2: Transform – Silver</div>
+  <div class="qn" onclick="jump('ph3')"><div class="dot" style="background:var(--yellow-l)"></div>Faza 3: Testy ← tu jesteś</div>
+  <div class="qn" onclick="jump('ph4')"><div class="dot" style="background:var(--border)"></div>Faza 4: Gold Layer</div>
+  <div class="qn" onclick="jump('ph5')"><div class="dot" style="background:var(--border)"></div>Faza 5: Portfolio</div>
+</div>
+
+<main>
+
+<!-- ════════════════════════════════════════ -->
+<!-- FAZA 1 — DONE                          -->
+<!-- ════════════════════════════════════════ -->
+<div class="phase col" id="ph1">
+  <div class="ph" onclick="tph('ph1')">
+    <div class="ph-icon">✅</div>
+    <div class="ph-title">Faza 1 — Extract + Load (Bronze)</div>
+    <div class="ph-meta">4/4 · UKOŃCZONA</div>
+    <div class="ph-chev">▼</div>
+  </div>
+  <div class="ph-body">
+    <div class="task done" id="t1-1">
+      <div class="th" onclick="tt('t1-1')">
+        <div class="chk" onclick="td(event,'t1-1')">✓</div>
+        <div class="tmain"><div class="tname">extract_volcanoes_from_eonet()</div><div class="tbrief">NASA EONET API, params, raise_for_status, try/except, return events list</div></div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb"><div class="slabel">Czego się nauczyłaś</div><div style="font-size:.8rem;color:var(--text2)">requests.get(url, params={}), response.raise_for_status(), data.get('events', []) jako bezpieczny dostęp do klucza, try/except Timeout + ConnectionError z raise dalej do pipeline.py.</div></div>
+    </div>
+    <div class="task done" id="t1-2">
+      <div class="th" onclick="tt('t1-2')">
+        <div class="chk" onclick="td(event,'t1-2')">✓</div>
+        <div class="tmain"><div class="tname">extract_volcanoes_from_noaa() z paginacją</div><div class="tbrief">5 stron × 200 = 900 rekordów, range(1, last_page+1), list.extend()</div></div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb"><div class="slabel">Czego się nauczyłaś</div><div style="font-size:.8rem;color:var(--text2)">Pagination pattern: najpierw request bez params żeby znać totalPages, potem pętla. extend() rozpakowuje listę, append() by zagnieździło. range(stop) jest exclusive — dlatego +1.</div></div>
+    </div>
+    <div class="task done" id="t1-3">
+      <div class="th" onclick="tt('t1-3')">
+        <div class="chk" onclick="td(event,'t1-3')">✓</div>
+        <div class="tmain"><div class="tname">load.py — save_to_file() → Bronze</div><div class="tbrief">json.dump, context manager, mkdir(parents=True, exist_ok=True), dane 1:1 bez modyfikacji</div></div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb"></div>
+    </div>
+    <div class="task done" id="t1-4">
+      <div class="th" onclick="tt('t1-4')">
+        <div class="chk" onclick="td(event,'t1-4')">✓</div>
+        <div class="tmain"><div class="tname">config.py + pipeline.py</div><div class="tbrief">RAW_DIR, CLEAN_DIR jako Path, jeden punkt wejścia, brak if __name__ w modułach</div></div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════ -->
+<!-- FAZA 2 — TRANSFORM / SILVER            -->
+<!-- ════════════════════════════════════════ -->
+<div class="phase col" id="ph2">
+  <div class="ph" onclick="tph('ph2')">
+    <div class="ph-icon">✅</div>
+    <div class="ph-title">Faza 2 — Transform (Silver Layer)</div>
+    <div class="ph-meta">7/7 · UKOŃCZONA — pandas · data quality · Medallion Silver</div>
+    <div class="ph-chev">▼</div>
+  </div>
+  <div class="ph-body">
+
+    <!-- ──────────────────────────── -->
+    <!-- TASK 2-0: usuń __main__     -->
+    <!-- ──────────────────────────── -->
+    <div class="task done" id="t2-0">
+      <div class="th" onclick="tt('t2-0')">
+        <div class="chk" onclick="td(event,'t2-0')">✓</div>
+        <div class="tmain">
+          <div class="tname">🔴 Poprawka — usuń if __name__ z transform.py</div>
+          <div class="tbrief">Narusza konwencję projektu: orchestracja wyłącznie w pipeline.py</div>
+          <div class="ttags"><span class="tag tfix">do poprawki</span><span class="tag tconcept">konwencje</span></div>
+        </div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb">
+        <div class="warnbox">
+          ⚠️ <strong>Problem:</strong> Twój <code>transform/transform.py</code> ma na dole blok <code>if __name__ == "__main__":</code>. Narusza to ustaloną konwencję tego projektu: jedynym punktem wejścia jest <code>pipeline.py</code>. Żaden inny moduł nie powinien być uruchamiany bezpośrednio.
+        </div>
+
+        <div class="slabel">Dokładne kroki</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-action">Otwórz plik <code>transform/transform.py</code></div>
+              <div class="step-detail">Znajdź linie 20–22 na dole pliku.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-action">Usuń cały blok — dokładnie te 3 linie:</div>
+              <pre><span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
+    <span class="fn">check_noaa</span>()
+    <span class="fn">check_eonet</span>()</pre>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-action">Zapisz plik. Zweryfikuj — uruchom w terminalu:</div>
+              <pre>python transform/transform.py</pre>
+              <div class="step-detail">Powinno się uruchomić bez żadnego output-u i bez błędów. Moduł importuje się, nie wykonuje żadnego kodu.</div>
+            </div>
+          </div>
+          <div class="step concept">
+            <div class="step-num">💡</div>
+            <div class="step-body">
+              <div class="step-action">Dlaczego ta reguła istnieje?</div>
+              <div class="step-detail">Jeśli chcesz sprawdzić dane podczas developmentu — rób to w notebooku Jupyter lub przez tymczasowy print w pipeline.py. W środowisku produkcyjnym nikt nie uruchamia modułów bezpośrednio — wszystko idzie przez jeden orchestrator.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sc"><div class="sc-lbl">✓ Gotowe gdy</div><code>python transform/transform.py</code> — brak output-u, brak błędów. Plik ma tylko funkcje i importy.</div>
+      </div>
+    </div>
+
+
+    <!-- ──────────────────────────── -->
+    <!-- TASK 2-1: config filenames  -->
+    <!-- ──────────────────────────── -->
+    <div class="task done" id="t2-1">
+      <div class="th" onclick="tt('t2-1')">
+        <div class="chk" onclick="td(event,'t2-1')">✓</div>
+        <div class="tmain">
+          <div class="tname">Dodaj stałe Silver do config.py</div>
+          <div class="tbrief">CLEAN_NOAA_VOLCANOES_FILENAME i CLEAN_NOAA_EARTHQUAKES_FILENAME — nazwy plików Parquet w configu (EONET wypadł z projektu)</div>
+          <div class="ttags"><span class="tag tconcept">konwencje</span><span class="tag tpython">config</span></div>
+        </div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb">
+        <div class="slabel">Dokładne kroki</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-action">Otwórz <code>config.py</code></div>
+              <div class="step-detail">Znajdź sekcję z nazwami plików: <code>EONET_FILENAME</code> i <code>NOAA_FILENAME</code>.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-action">Bezpośrednio pod nimi dodaj dwie nowe stałe:</div>
+              <div class="step-detail">
+                Pierwsza: nazwa pliku Silver dla NOAA — rozszerzenie <code>.parquet</code>, nie <code>.json</code>.<br>
+                Druga: nazwa pliku Silver dla EONET — analogicznie.<br>
+                Konwencja nazewnictwa: snake_case, przyrostek <code>_clean</code>.
+              </div>
+            </div>
+          </div>
+          <div class="step concept">
+            <div class="step-num">💡</div>
+            <div class="step-body">
+              <div class="step-action">Dlaczego nazwy plików są w configu?</div>
+              <div class="step-detail">Jeśli jutro zmienisz nazwę pliku (np. dodasz datę: <code>noaa_clean_2026.parquet</code>), zmieniasz w jednym miejscu — nie szukasz wszystkich <code>"noaa_clean.parquet"</code> rozsianych po kodzie.</div>
+            </div>
+          </div>
+        </div>
+        <div class="sc"><div class="sc-lbl">✓ Gotowe gdy</div>config.py ma 4 stałe z nazwami plików: 2 dla Bronze (<code>_volcanoes.json</code>), 2 dla Silver (<code>_clean.parquet</code>).</div>
+      </div>
+    </div>
+
+
+    <!-- ──────────────────────────── -->
+    <!-- TASK 2-2: transform_noaa    -->
+    <!-- ──────────────────────────── -->
+    <div class="task done" id="t2-2">
+      <div class="th" onclick="tt('t2-2')">
+        <div class="chk" onclick="td(event,'t2-2')">✓</div>
+        <div class="tmain">
+          <div class="tname">transform_noaa() — czyszczenie 900 rekordów historycznych</div>
+          <div class="tbrief">43 kolumny → 13 użytecznych · nulle · typy · deduplikacja · zwróć DataFrame</div>
+          <div class="ttags"><span class="tag tpandas">pandas</span><span class="tag tde">data quality</span><span class="tag tconcept">Silver layer</span></div>
+        </div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb">
+
+        <div class="warnbox">
+          ✅ <strong>Gotowe (2026-08-10):</strong> sygnatura, docstring, selekcja/rename przez <code>NOAA_COLUMN_MAP</code>, obsługa nulli (fillna+astype dla vei i deaths_total), <code>drop_duplicates()</code>, <code>reset_index(drop=True)</code>, log shape. <strong>Świadome odstępstwo od planu:</strong> kolumna <code>location</code> celowo pominięta — zostajemy przy 12 kolumnach zamiast 13, bo <code>country</code> wystarcza do wszystkich trzech analiz.
+        </div>
+
+        <div class="slabel">Rzeczywista struktura danych NOAA (43 kolumny, wybrane poniżej)</div>
+        <table class="dtable">
+          <tr><th>Kolumna</th><th>Typ</th><th>Nulle</th><th>Co to jest</th><th>Co z nią robisz</th></tr>
+          <tr><td>year</td><td>int64</td><td class="ok-hi">0</td><td>Rok erupcji (od 1169!)</td><td>Zostaw, nie modyfikuj</td></tr>
+          <tr><td>month</td><td>float64</td><td class="null-hi">133</td><td>Miesiąc (może być nieznany)</td><td>Zostaw NaN — nie znamy daty</td></tr>
+          <tr><td>day</td><td>float64</td><td class="null-hi">191</td><td>Dzień miesiąca</td><td>Zostaw NaN</td></tr>
+          <tr><td>name</td><td>object</td><td class="ok-hi">0</td><td>Nazwa wulkanu (np. "Etna")</td><td>Zostaw</td></tr>
+          <tr><td>country</td><td>object</td><td class="ok-hi">0</td><td>Kraj (np. "Italy")</td><td>Zostaw</td></tr>
+          <tr><td>location</td><td>object</td><td class="ok-hi">0</td><td>Lokalizacja szczegółowa</td><td>Zostaw</td></tr>
+          <tr><td>latitude</td><td>float64</td><td class="ok-hi">0</td><td>Szerokość geograf.</td><td>Zostaw</td></tr>
+          <tr><td>longitude</td><td>float64</td><td class="ok-hi">0</td><td>Długość geograf.</td><td>Zostaw</td></tr>
+          <tr><td>elevation</td><td>int64</td><td class="ok-hi">0</td><td>Wysokość wulkanu (m)</td><td>Zostaw</td></tr>
+          <tr><td>morphology</td><td>object</td><td class="ok-hi">0</td><td>Typ wulkanu (Stratovolcano...)</td><td>Zostaw</td></tr>
+          <tr><td>vei</td><td>float64</td><td class="null-hi">157</td><td>Volcanic Explosivity Index 0–8</td><td>fillna(-1) — patrz krok 8</td></tr>
+          <tr><td>deathsTotal</td><td>float64</td><td class="null-hi">423</td><td>Całk. ofiary śmiertelne (z powiąz. event.)</td><td>fillna(0)</td></tr>
+          <tr><td>significant</td><td>bool</td><td class="ok-hi">0</td><td>Czy znacząca erupcja?</td><td>Zostaw</td></tr>
+          <tr><td>Pozostałe 30 kolumn</td><td>—</td><td>—</td><td>Wewnętrzne ID, duplikaty sum, rzadkie pola</td><td>Usuń — nie są potrzebne</td></tr>
+        </table>
+
+        <div class="slabel">Dokładne kroki do wykonania</div>
+        <div class="steps">
+
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-action">Zaktualizuj import na górze <code>transform/transform.py</code></div>
+              <div class="step-detail">
+                Dodaj do istniejącej linii importu z config:<br>
+                <code>CLEAN_DIR</code>, <code>CLEAN_NOAA_FILENAME</code>, <code>CLEAN_EONET_FILENAME</code><br>
+                Upewnij się też że <code>import logging</code> jest w importach.
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-action">Napisz sygnaturę funkcji z type hint i docstringiem</div>
+              <div class="step-detail">
+                Funkcja nie przyjmuje argumentów (wie skąd czytać — z configu).<br>
+                Zwraca <code>pd.DataFrame</code>.<br>
+                Docstring: jednolinijkowy opis co robi i co zwraca.
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-action">Wczytaj dane z Bronze: <code>pd.read_json(RAW_DIR / NOAA_FILENAME)</code></div>
+              <div class="step-detail">
+                Zapisz do zmiennej <code>df</code>.<br>
+                Zaloguj lub wypisz kształt przed transformacją: <code>logging.info(f"NOAA raw shape: {df.shape}")</code>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-action">Wybierz dokładnie te 13 kolumn (odrzuć pozostałe 30)</div>
+              <div class="step-detail">
+                Użyj: <code>df = df[LISTA_KOLUMN]</code><br>
+                Kolumny do zachowania (12 — <code>location</code> świadomie pominięta, <code>country</code> wystarcza): <code>year</code>, <code>month</code>, <code>day</code>, <code>name</code>, <code>country</code>, <code>latitude</code>, <code>longitude</code>, <code>elevation</code>, <code>morphology</code>, <code>vei</code>, <code>deathsTotal</code>, <code>significant</code>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-action">Zmień nazwę kolumny <code>deathsTotal</code> → <code>deaths_total</code></div>
+              <div class="step-detail">
+                Użyj: <code>df.rename(columns={'deathsTotal': 'deaths_total'}, inplace=True)</code><br>
+                <strong>Dlaczego?</strong> Konwencja Python i DE: snake_case w nazwach kolumn. camelCase pochodzi z API — w Silver standaryzujemy nazewnictwo.
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <div class="step-action">Obsłuż nulle w <code>deaths_total</code>: <code>fillna(0)</code></div>
+              <div class="step-detail">
+                Brak danych o ofiarach = zakładamy 0. To uzasadniona decyzja dla kolumny zliczającej.
+              </div>
+            </div>
+          </div>
+
+          <div class="step warn">
+            <div class="step-num">7</div>
+            <div class="step-body">
+              <div class="step-action">Obsłuż nulle w <code>vei</code>: <code>fillna(-1)</code> — NIE <code>fillna(0)</code></div>
+              <div class="step-detail">
+                <strong>Dlaczego -1, nie 0?</strong><br>
+                VEI 0 to prawdziwa wartość — oznacza erupcję nieeksplozywną (np. spokojny wypływ lawy na Hawajach).<br>
+                Jeśli wypełnisz null zerem, zafałszujesz dane: erupcja o nieznanej sile staje się erupcją nieeksplozywną.<br>
+                Wartość -1 sygnalizuje "brak danych" i nie koliduje z prawdziwą skalą 0–8.
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">8</div>
+            <div class="step-body">
+              <div class="step-action">Rzutuj typy kolumn</div>
+              <div class="step-detail">
+                <code>vei</code>: po fillna(-1) nie ma już NaN → cast do <code>int64</code> metodą <code>.astype(int)</code><br>
+                <code>deaths_total</code>: po fillna(0) → cast do <code>int64</code><br>
+                <code>year</code>, <code>elevation</code>: już <code>int64</code> — nic nie rób<br>
+                <code>month</code>, <code>day</code>: zostaw jako <code>float64</code> z NaN — nie castuj do int (int nie przyjmuje NaN w standardowym pandas)
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">9</div>
+            <div class="step-body">
+              <div class="step-action">Deduplikacja: <code>df.drop_duplicates()</code></div>
+              <div class="step-detail">
+                Przed wywołaniem zapamiętaj <code>len(df)</code> w zmiennej.<br>
+                Po wywołaniu zaloguj: <code>f"Usunięto {przed - len(df)} duplikatów"</code><br>
+                (Spoiler: w tych danych prawdopodobnie 0 — ale sprawdzenie jest częścią procesu.)
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">10</div>
+            <div class="step-body">
+              <div class="step-action">Reset indeksu: <code>df.reset_index(drop=True)</code></div>
+              <div class="step-detail">
+                Po drop_duplicates() indeks może mieć "dziury" (np. 0, 1, 3, 5...).<br>
+                <code>reset_index(drop=True)</code> robi ciągły indeks od 0.<br>
+                <code>drop=True</code> — nie twórz kolumny ze starym indeksem.
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">11</div>
+            <div class="step-body">
+              <div class="step-action">Zaloguj shape po transformacji i zwróć DataFrame</div>
+              <div class="step-detail">
+                <code>logging.info(f"NOAA clean shape: {df.shape}")</code><br>
+                <code>return df</code><br>
+                Funkcja <strong>nie zapisuje</strong> — zapis robi osobna funkcja (separacja odpowiedzialności).
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sc">
+          <div class="sc-lbl">✓ Gotowe gdy</div>
+          W notebooku lub tymczasowym skrypcie:<br>
+          <code>df = transform_noaa()</code><br>
+          <code>df.dtypes</code> — vei i deaths_total są <code>int64</code>, nie <code>float64</code><br>
+          <code>df.isnull().sum()</code> — tylko month i day mogą mieć nulle<br>
+          <code>df.columns.tolist()</code> — dokładnie 12 kolumn, deathsTotal nie istnieje (jest deaths_total)<br>
+          <code>df['vei'].min()</code> — powinno być -1 (nie 0)
+        </div>
+
+        <button class="hint-btn" onclick="sh('hint-noaa')">💡 Hint — szkielet funkcji</button>
+        <div class="hint-box" id="hint-noaa">
+<pre><span class="kw">def</span> <span class="fn">transform_noaa</span>() -> pd.DataFrame:
+    <span class="st">"""Clean NOAA volcanic eruptions data. Returns Silver-layer DataFrame."""</span>
+    df = pd.<span class="fn">read_json</span>(RAW_DIR / NOAA_FILENAME)
+    logging.<span class="fn">info</span>(<span class="st">f"NOAA raw: {df.shape}"</span>)
+
+    columns = [<span class="st">'year'</span>, <span class="st">'month'</span>, <span class="st">'day'</span>, <span class="st">'name'</span>, <span class="st">'country'</span>, <span class="st">'location'</span>,
+               <span class="st">'latitude'</span>, <span class="st">'longitude'</span>, <span class="st">'elevation'</span>, <span class="st">'morphology'</span>,
+               <span class="st">'vei'</span>, <span class="st">'deathsTotal'</span>, <span class="st">'significant'</span>]
+    df = df[columns]
+
+    df = df.<span class="fn">rename</span>(columns={<span class="st">'deathsTotal'</span>: <span class="st">'deaths_total'</span>})
+
+    df[<span class="st">'deaths_total'</span>] = df[<span class="st">'deaths_total'</span>].<span class="fn">fillna</span>(<span class="num">0</span>)
+    df[<span class="st">'vei'</span>] = df[<span class="st">'vei'</span>].<span class="fn">fillna</span>(<span class="num">-1</span>)
+
+    df[<span class="st">'vei'</span>] = df[<span class="st">'vei'</span>].<span class="fn">astype</span>(<span class="fn">int</span>)
+    df[<span class="st">'deaths_total'</span>] = df[<span class="st">'deaths_total'</span>].<span class="fn">astype</span>(<span class="fn">int</span>)
+
+    before = <span class="fn">len</span>(df)
+    df = df.<span class="fn">drop_duplicates</span>()
+    logging.<span class="fn">info</span>(<span class="st">f"Removed {before - len(df)} duplicates"</span>)
+
+    df = df.<span class="fn">reset_index</span>(drop=<span class="kw">True</span>)
+    logging.<span class="fn">info</span>(<span class="st">f"NOAA clean: {df.shape}"</span>)
+    <span class="kw">return</span> df</pre>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ──────────────────────────── -->
+    <!-- TASK 2-3: transform_noaa_earthquakes -->
+    <!-- ──────────────────────────── -->
+    <div class="task done" id="t2-3">
+      <div class="th" onclick="tt('t2-3')">
+        <div class="chk" onclick="td(event,'t2-3')">✓</div>
+        <div class="tmain">
+          <div class="tname">transform_noaa_earthquakes() — czyszczenie trzęsień ziemi + realny FK join</div>
+          <div class="tbrief">6692 rekordy · ten sam hazard-service co volcanoes · volcanoEventId jako prawdziwy klucz obcy</div>
+          <div class="ttags"><span class="tag tpandas">pandas</span><span class="tag tconcept">foreign key</span><span class="tag tde">Silver layer</span></div>
+        </div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb">
+
+        <div class="warnbox">
+          🔁 <strong>Zmiana planu (2026-08-10):</strong> EONET wypadł z projektu — 75 rekordów bez wspólnego klucza z NOAA, żadna z trzech analiz go nie używała. Zamiast tego: <code>earthquakes</code> z tego samego NOAA hazard-service co <code>volcanoes</code>. Kluczowa różnica: rekordy trzęsień ziemi mają pole <code>volcanoEventId</code> — prawdziwy, gotowy klucz obcy do konkretnego zdarzenia wulkanicznego (zweryfikowane na żywym API: trzęsienie z roku 79 ma <code>volcanoEventId: 1348</code> — to Wezuwiusz/Pompeje). To realny join, nie dopasowanie po współrzędnych.
+        </div>
+
+        <div class="slabel">Rzeczywista struktura rekordu earthquakes (próbka z API)</div>
+        <table class="dtable">
+          <tr><th>Kolumna</th><th>Co to jest</th><th>Co z nią robisz</th></tr>
+          <tr><td>year, month, day</td><td>Data (month/day często brakuje w starych rekordach)</td><td>Zostaw, month/day jako float z NaN</td></tr>
+          <tr><td>locationName</td><td>Opis lokalizacji, np. "ITALY: NAPLES (NAPOLI)"</td><td>rename → <code>location</code></td></tr>
+          <tr><td>country</td><td>Kraj</td><td>Zostaw</td></tr>
+          <tr><td>latitude, longitude</td><td>Współrzędne</td><td>Zostaw</td></tr>
+          <tr><td>eqMagnitude</td><td>Magnituda trzęsienia (skala Richtera), często brak dla starych zdarzeń</td><td>rename → <code>magnitude</code>, zostaw NaN — brak pomiaru to nie 0</td></tr>
+          <tr><td>intensity</td><td>Intensywność odczuwalna (skala Mercalliego)</td><td>Zostaw NaN gdzie brak</td></tr>
+          <tr><td>deathsTotal</td><td>Ofiary śmiertelne</td><td>rename → <code>deaths_total</code>, fillna(0)</td></tr>
+          <tr><td>volcanoEventId</td><td><strong>FK do NOAA volcanoes</strong> — obecne tylko gdy trzęsienie towarzyszyło erupcji</td><td>Zostaw jako nullable <code>Int64</code> (nie -1 — to ID, nie miara)</td></tr>
+          <tr><td>tsunamiEventId</td><td>FK do (niedostępnego w tym projekcie) datasetu tsunami</td><td>Zostaw jako nullable <code>Int64</code>, opcjonalnie do przyszłego użytku</td></tr>
+        </table>
+
+        <div class="slabel">Dokładne kroki</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-action">Popraw docstring — obecny nadal mówi o EONET</div>
+              <div class="step-detail">Aktualny: <code>"""Clean raw EONET eruption data..."""</code> — zmień na coś w stylu <code>"""Clean raw NOAA earthquakes data and return the Silver-layer DataFrame."""</code></div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-action">Zbuduj <code>NOAA_EARTHQUAKES_COLUMN_MAP</code> analogicznie do <code>NOAA_VOLCANOES_COLUMN_MAP</code></div>
+              <div class="step-detail">
+                Klucze (oryginalne nazwy): <code>year</code>, <code>month</code>, <code>day</code>, <code>locationName</code>, <code>country</code>, <code>latitude</code>, <code>longitude</code>, <code>eqMagnitude</code>, <code>intensity</code>, <code>deathsTotal</code>, <code>volcanoEventId</code>, <code>tsunamiEventId</code><br>
+                Rename: <code>locationName</code>→<code>location</code>, <code>eqMagnitude</code>→<code>magnitude</code>, <code>deathsTotal</code>→<code>deaths_total</code>, reszta bez zmian.
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-action">Selekcja + rename jednym wywołaniem, tak jak w transform_noaa()</div>
+              <div class="step-detail"><code>df = df[list(NOAA_EARTHQUAKES_COLUMN_MAP)].rename(columns=NOAA_EARTHQUAKES_COLUMN_MAP)</code></div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-action"><code>deaths_total</code>: fillna(0) + astype(int) — dokładnie jak w transform_noaa()</div>
+            </div>
+          </div>
+          <div class="step warn">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-action"><code>volcanoEventId</code> i <code>tsunamiEventId</code>: NIE fillna(-1) jak przy vei</div>
+              <div class="step-detail">
+                To są identyfikatory (FK), nie miary — nie mają domyślnej "sensownej" wartości zastępczej. Zamiast sentinela użyj nullable integer: <code>df['volcanoEventId'] = df['volcanoEventId'].astype('Int64')</code> (duże <code>I</code> — to typ pandas obsługujący NaN w kolumnie całkowitoliczbowej, czego zwykły <code>int64</code> nie potrafi).<br>
+                To nowy koncept względem <code>vei</code>/<code>-1</code> — tam sentinel miał sens domenowy (brak pomiaru), tu wolisz zachować prawdziwy brak wartości.
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <div class="step-action">Deduplikacja + reset_index + log shape + return — identycznie jak transform_noaa()</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sc">
+          <div class="sc-lbl">✓ Gotowe gdy</div>
+          <code>df = transform_noaa_earthquakes()</code><br>
+          <code>df.columns.tolist()</code> — 11 kolumn (locationName/eqMagnitude/deathsTotal nie istnieją, są location/magnitude/deaths_total)<br>
+          <code>df['volcanoEventId'].dtype</code> — <code>Int64</code> (nullable), nie <code>float64</code><br>
+          <code>df['volcanoEventId'].notna().sum()</code> — niewielka część rekordów ma powiązany wulkan, to oczekiwane
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ──────────────────────────── -->
+    <!-- TASK 2-4: save_to_clean     -->
+    <!-- ──────────────────────────── -->
+    <div class="task done" id="t2-4">
+      <div class="th" onclick="tt('t2-4')">
+        <div class="chk" onclick="td(event,'t2-4')">✓</div>
+        <div class="tmain">
+          <div class="tname">save_to_clean() — zapis Silver jako Parquet</div>
+          <div class="tbrief">df.to_parquet() · CLEAN_DIR · index=False · dlaczego Parquet a nie JSON</div>
+          <div class="ttags"><span class="tag tpandas">pandas</span><span class="tag tconcept">Parquet</span><span class="tag tde">Silver layer</span></div>
+        </div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb">
+
+        <div class="slabel">Dlaczego Parquet, nie JSON?</div>
+        <table class="dtable">
+          <tr><th></th><th>JSON (Bronze)</th><th>Parquet (Silver/Gold)</th></tr>
+          <tr><td>Storage</td><td>Row-oriented — cały rekord razem</td><td>Column-oriented — kolumna osobno</td></tr>
+          <tr><td>Typy</td><td>Brak — "2026" może być string lub int</td><td>Zapisane explicite — wczytasz int jako int</td></tr>
+          <tr><td>Kompresja</td><td>Brak (lub gzip jako osobny krok)</td><td>Wbudowana (Snappy/zstd) — domyślnie ON</td></tr>
+          <tr><td>SELECT vei tylko</td><td>Czyta cały plik, potem filtruje</td><td>Czyta tylko kolumnę vei — reszta pomijana</td></tr>
+          <tr><td>Rozmiar</td><td>~3× większy</td><td>Mniejszy</td></tr>
+        </table>
+
+        <div class="slabel">Dokładne kroki</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-action">Napisz funkcję <code>save_to_clean(df, filename)</code> z docstringiem</div>
+              <div class="step-detail">
+                Argumenty: <code>df: pd.DataFrame</code>, <code>filename: str</code><br>
+                Nic nie zwraca (<code>-> None</code>). Efektem ubocznym jest zapis pliku.
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-action">Utwórz folder jeśli nie istnieje</div>
+              <div class="step-detail">Identycznie jak w load.py: <code>CLEAN_DIR.mkdir(parents=True, exist_ok=True)</code></div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-action">Zbuduj pełną ścieżkę: <code>path = CLEAN_DIR / filename</code></div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-action">Zapisz: <code>df.to_parquet(path, index=False)</code></div>
+              <div class="step-detail">
+                <code>index=False</code> — nie zapisuj indeksu DataFrame jako osobnej kolumny w pliku.<br>
+                To standardowa konwencja: indeks jest artefaktem pandas, nie częścią danych.
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-action">Zaloguj: ile wierszy, do jakiej ścieżki</div>
+              <div class="step-detail"><code>logging.info(f"Saved {len(df)} rows → {path}")</code></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sc">
+          <div class="sc-lbl">✓ Gotowe gdy</div>
+          Po wywołaniu <code>save_to_clean(df, CLEAN_NOAA_VOLCANOES_FILENAME)</code>:<br>
+          Plik <code>data/clean/noaa_volcanoes_clean.parquet</code> istnieje.<br>
+          <code>pd.read_parquet(...).dtypes</code> — vei i deaths_total są <code>int64</code>; dla earthquakes <code>volcanoEventId</code> jest <code>Int64</code> (nullable).
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ──────────────────────────── -->
+    <!-- TASK 2-5: wire pipeline     -->
+    <!-- ──────────────────────────── -->
+    <div class="task done" id="t2-5">
+      <div class="th" onclick="tt('t2-5')">
+        <div class="chk" onclick="td(event,'t2-5')">✓</div>
+        <div class="tmain">
+          <div class="tname">Wpiąć transform do pipeline.py</div>
+          <div class="tbrief">Pełny flow: API → Bronze → Silver — jeden python pipeline.py robi wszystko</div>
+          <div class="ttags"><span class="tag tconcept">architektura</span><span class="tag tde">ELT</span></div>
+        </div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb">
+        <div class="slabel">Dokładne kroki</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-action">Otwórz <code>pipeline.py</code></div>
+              <div class="step-detail">Teraz ma import + 2 wywołania w if __name__: <code>load_noaa_earthquakes()</code>, <code>load_noaa_volcanoes()</code>.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-action">Dodaj import transform funkcji na górze</div>
+              <div class="step-detail">
+                <code>from transform.transform import transform_noaa, transform_noaa_earthquakes, save_to_clean</code><br>
+                Konwencja: jawne importy konkretnych funkcji — nie <code>import transform</code>.
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-action">Dodaj import stałych z config</div>
+              <div class="step-detail">
+                Dodaj <code>CLEAN_NOAA_VOLCANOES_FILENAME</code> i <code>CLEAN_NOAA_EARTHQUAKES_FILENAME</code> do istniejącej linii importu z config.
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-action">Dodaj import logging i basicConfig na górze</div>
+              <div class="step-detail">
+                <code>import logging</code><br>
+                <code>logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')</code><br>
+                Dzięki temu logi z transform.py będą widoczne przy uruchamianiu pipeline.
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-action">Rozbuduj blok <code>if __name__ == "__main__":</code></div>
+              <div class="step-detail">
+                Istniejąca kolejność: <code>load_noaa_earthquakes()</code>, <code>load_noaa_volcanoes()</code> — to już jest.<br>
+                Dodaj pod nimi:<br>
+                1. <code>volcanoes_df = transform_noaa()</code><br>
+                2. <code>save_to_clean(volcanoes_df, CLEAN_NOAA_VOLCANOES_FILENAME)</code><br>
+                3. <code>earthquakes_df = transform_noaa_earthquakes()</code><br>
+                4. <code>save_to_clean(earthquakes_df, CLEAN_NOAA_EARTHQUAKES_FILENAME)</code>
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <div class="step-action">Uruchom: <code>python pipeline.py</code></div>
+              <div class="step-detail">
+                Powinno się zakończyć bez błędów. Logi powinny pokazywać shapey: raw, clean.<br>
+                Sprawdź że <code>data/clean/</code> ma pliki <code>.parquet</code>.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sc">
+          <div class="sc-lbl">✓ Gotowe gdy</div>
+          <code>python pipeline.py</code> kończy się bez błędów.<br>
+          <code>ls data/raw/</code> — 2 pliki .json<br>
+          <code>ls data/clean/</code> — 2 pliki .parquet<br>
+          <code>python -c "import pandas as pd; df=pd.read_parquet('data/clean/noaa_volcanoes_clean.parquet'); print(df.shape, df.dtypes)"</code> — wyświetla (900, 12) i poprawne typy.
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ──────────────────────────── -->
+    <!-- TASK 2-6: verify Silver      -->
+    <!-- ──────────────────────────── -->
+    <div class="task done" id="t2-6">
+      <div class="th" onclick="tt('t2-6')">
+        <div class="chk" onclick="td(event,'t2-6')">✓</div>
+        <div class="tmain">
+          <div class="tname">Weryfikacja Silver Layer — data quality check</div>
+          <div class="tbrief">Napisz skrypt weryfikujący że Silver Layer spełnia założenia jakościowe</div>
+          <div class="ttags"><span class="tag tde">data quality</span><span class="tag tpandas">pandas</span></div>
+        </div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb">
+        <div class="slabel">Co sprawdzić po transformacji</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-action">Brak NaN w kolumnach wymaganych</div>
+              <div class="step-detail">
+                W NOAA: <code>assert df[['year', 'name', 'country', 'latitude', 'longitude']].isnull().sum().sum() == 0</code><br>
+                Żadna z wymaganych kolumn nie może mieć nulli.
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-action">VEI nie ma 0 jako "brak danych"</div>
+              <div class="step-detail">
+                <code>assert df['vei'].min() == -1</code> — potwierdza że użyłaś -1, nie 0.<br>
+                <code>assert df['vei'].max() &lt;= 8</code> — skala VEI to 0–8.
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-action">Koordynaty w sensownym zakresie</div>
+              <div class="step-detail">
+                <code>assert df['latitude'].between(-90, 90).all()</code><br>
+                <code>assert df['longitude'].between(-180, 180).all()</code>
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-action">Brak duplikatów</div>
+              <div class="step-detail"><code>assert df.duplicated().sum() == 0</code></div>
+            </div>
+          </div>
+          <div class="step concept">
+            <div class="step-num">💡</div>
+            <div class="step-body">
+              <div class="step-action">To jest zarys data quality validation</div>
+              <div class="step-detail">W produkcji te asserty zamieniają się w testy pytest lub Great Expectations. Na razie — assert w pipeline.py po transformacji to dobra praktyka.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /ph-body faza 2 -->
+</div><!-- /phase faza 2 -->
+
+
+<!-- ════════════════════════════════════════ -->
+<!-- FAZA 3 — TESTY                         -->
+<!-- ════════════════════════════════════════ -->
+<div class="phase" id="ph3">
+  <div class="ph" onclick="tph('ph3')">
+    <div class="ph-icon">🧪</div>
+    <div class="ph-title">Faza 3 — Testy (pytest)</div>
+    <div class="ph-meta">0/4 · pytest · mocking · unit tests</div>
+    <div class="ph-chev">▼</div>
+  </div>
+  <div class="ph-body">
+
+    <div class="task" id="t3-1">
+      <div class="th" onclick="tt('t3-1')">
+        <div class="chk" onclick="td(event,'t3-1')"></div>
+        <div class="tmain"><div class="tname">Utwórz strukturę tests/</div><div class="tbrief">tests/__init__.py, test_extract.py, test_transform.py, konfig pytest</div>
+          <div class="ttags"><span class="tag ttest">pytest</span><span class="tag tconcept">konwencje</span></div>
+        </div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb">
+        <div class="slabel">Dokładne kroki</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-action">Utwórz katalog <code>tests/</code> w korzeniu projektu</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-action">W <code>tests/</code> utwórz pusty plik <code>__init__.py</code></div>
+              <div class="step-detail">Oznacza katalog jako Python package — wymagane żeby pytest poprawnie importował moduły projektu.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-action">Utwórz <code>tests/test_extract.py</code> i <code>tests/test_transform.py</code></div>
+              <div class="step-detail">Na razie pustę, z samym importem: <code>import pytest</code>.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-action">Sprawdź że pytest działa: <code>pytest tests/ -v</code></div>
+              <div class="step-detail">Powinno powiedzieć "no tests ran" — bez błędów importu.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" id="t3-2">
+      <div class="th" onclick="tt('t3-2')">
+        <div class="chk" onclick="td(event,'t3-2')"></div>
+        <div class="tmain"><div class="tname">test_extract.py — mockowanie requests.get</div>
+          <div class="tbrief">Nie uderzamy w prawdziwe API. MagicMock + patch → szybkie, deterministyczne testy</div>
+          <div class="ttags"><span class="tag ttest">pytest</span><span class="tag tconcept">mocking</span></div>
+        </div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb">
+        <div class="slabel">Dokładne kroki — test extract_earthquakes_from_noaa()</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-action">Importy potrzebne w test_extract.py</div>
+              <div class="step-detail">
+                <code>import pytest</code><br>
+                <code>from unittest.mock import patch, MagicMock</code><br>
+                <code>from extract.extract import extract_earthquakes_from_noaa, extract_volcanoes_from_noaa</code>
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-action">Napisz funkcję <code>def test_earthquakes_returns_list_of_items():</code></div>
+              <div class="step-detail">
+                Konwencja pytest: nazwa funkcji zaczyna się od <code>test_</code>. Opisowa nazwa — co testujesz.<br>
+                Wewnątrz: utwórz mock response, zastosuj patch na <code>'extract.extract.requests.get'</code>, wywołaj funkcję, sprawdź assert.
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-action">Co mockować: paginacja NOAA — pierwszy request bez params (dla totalPages), potem strony z <code>{'items': [...]}</code></div>
+              <div class="step-detail">
+                Stwórz <code>mock_page_info = MagicMock()</code>, <code>mock_page_info.json.return_value = {'totalPages': 1, 'items': []}</code><br>
+                Stwórz <code>mock_page1 = MagicMock()</code>, <code>mock_page1.json.return_value = {'items': [{'id': 58, 'volcanoEventId': 1348}]}</code><br>
+                Użyj <code>with patch('extract.extract.requests.get', side_effect=[mock_page_info, mock_page1]):</code>
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-action">Assert: wynik jest listą o długości 1, z poprawnym id</div>
+              <div class="step-detail">
+                <code>assert isinstance(result, list)</code><br>
+                <code>assert len(result) == 1</code><br>
+                <code>assert result[0]['id'] == 58</code>
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-action">Napisz test dla przypadku pustej odpowiedzi</div>
+              <div class="step-detail">
+                <code>def test_earthquakes_returns_empty_list_when_no_items():</code><br>
+                Mock zwraca <code>{'items': []}</code> (lub klucz w ogóle nie istnieje).<br>
+                Assert: wynik to pusta lista, nie KeyError.
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <div class="step-action">Napisz analogiczny test dla volcanoes z paginacją</div>
+              <div class="step-detail">
+                NOAA volcanoes robi te same 2 rodzaje requestów: pierwszy bez params (totalPages), reszta z params.<br>
+                Mock musi zwracać różne wartości dla różnych wywołań — użyj <code>side_effect=[response1, response2, response3...]</code> zamiast <code>return_value</code>.
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="hint-btn" onclick="sh('hint-mock')">💡 Hint — side_effect dla wielu wywołań</button>
+        <div class="hint-box" id="hint-mock">
+<pre><span class="cm"># NOAA robi 1 request na totalPages + N requestów na strony</span>
+<span class="cm"># side_effect pozwala zwracać różne wartości kolejno</span>
+mock_page_info = MagicMock()
+mock_page_info.json.<span class="fn">return_value</span> = {<span class="st">'totalPages'</span>: <span class="num">2</span>, <span class="st">'items'</span>: []}
+
+mock_page1 = MagicMock()
+mock_page1.json.<span class="fn">return_value</span> = {<span class="st">'items'</span>: [{<span class="st">'id'</span>: <span class="num">1</span>, <span class="st">'name'</span>: <span class="st">'Etna'</span>}]}
+
+mock_page2 = MagicMock()
+mock_page2.json.<span class="fn">return_value</span> = {<span class="st">'items'</span>: [{<span class="st">'id'</span>: <span class="num">2</span>, <span class="st">'name'</span>: <span class="st">'Stromboli'</span>}]}
+
+<span class="kw">with</span> <span class="fn">patch</span>(<span class="st">'extract.extract.requests.get'</span>,
+           side_effect=[mock_page_info, mock_page1, mock_page2]):
+    result = <span class="fn">extract_volcanoes_from_noaa</span>()
+
+<span class="kw">assert</span> <span class="fn">len</span>(result) == <span class="num">2</span>  <span class="cm"># 1 z page1 + 1 z page2</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" id="t3-3">
+      <div class="th" onclick="tt('t3-3')">
+        <div class="chk" onclick="td(event,'t3-3')"></div>
+        <div class="tmain"><div class="tname">test_transform.py — testy logiki czyszczenia</div>
+          <div class="tbrief">Tworzysz DataFrame wejściowy, sprawdzasz co wychodzi — bez żadnych plików</div>
+          <div class="ttags"><span class="tag ttest">pytest</span><span class="tag tpandas">pandas</span></div>
+        </div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb">
+        <div class="slabel">Dokładne kroki</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-action">Strategia: nie testujesz pd.read_json() — testujesz swoją logikę</div>
+              <div class="step-detail">
+                Refaktoryzuj transform_noaa() tak żeby przyjmowała <code>df: pd.DataFrame</code> jako argument (zamiast czytać z pliku).<br>
+                Oddzielna funkcja <code>load_noaa_raw() -> pd.DataFrame</code> czyta z pliku.<br>
+                Dzięki temu możesz testować transform_noaa z dowolnym DataFrame bez pliku na dysku.
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-action">Napisz test: vei null → -1</div>
+              <div class="step-detail">
+                Stwórz DataFrame z jednym rekordem gdzie vei = None (null).<br>
+                Wywołaj transform_noaa(df).<br>
+                Assert: wynikowe df['vei'].iloc[0] == -1
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-action">Napisz test: deaths_total null → 0</div>
+              <div class="step-detail">Analogicznie: wejście None, wyjście 0.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-action">Napisz test: duplikaty są usuwane</div>
+              <div class="step-detail">
+                Wejście: DataFrame z 2 identycznymi wierszami.<br>
+                Assert: <code>len(result) == 1</code>
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-action">Napisz test: typy kolumn są poprawne</div>
+              <div class="step-detail">
+                Assert: <code>result['vei'].dtype == 'int64'</code><br>
+                Assert: <code>result['deaths_total'].dtype == 'int64'</code>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sc"><div class="sc-lbl">✓ Gotowe gdy</div><code>pytest tests/ -v</code> pokazuje wszystkie testy zielone. Żadnych warnings o deprecation.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════ -->
+<!-- FAZA 4 — GOLD LAYER (opcjonalna)       -->
+<!-- ════════════════════════════════════════ -->
+<div class="phase col" id="ph4">
+  <div class="ph" onclick="tph('ph4')">
+    <div class="ph-icon">🏆</div>
+    <div class="ph-title">Faza 4 — Gold Layer (opcjonalna)</div>
+    <div class="ph-meta">0/3 · star schema · SQL · Medallion Gold</div>
+    <div class="ph-chev">▼</div>
+  </div>
+  <div class="ph-body">
+    <div class="task" id="t4-1">
+      <div class="th" onclick="tt('t4-1')">
+        <div class="chk" onclick="td(event,'t4-1')"></div>
+        <div class="tmain"><div class="tname">Zaprojektuj star schema na kartce papieru</div>
+          <div class="tbrief">fact_eruptions + dim_volcano + dim_location + dim_time — zacznij od pytań analitycznych</div>
+          <div class="ttags"><span class="tag tde">Gold layer</span><span class="tag tconcept">star schema</span></div>
+        </div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb">
+        <div class="slabel">Pytania analityczne → schemat</div>
+        <div class="steps">
+          <div class="step concept">
+            <div class="step-num">💡</div>
+            <div class="step-body">
+              <div class="step-action">Zacznij od pytań, nie od tabel</div>
+              <div class="step-detail">
+                Jakie pytania chcesz zadawać swoim danym?<br>
+                • Które kraje mają najwięcej erupcji o VEI ≥ 5?<br>
+                • Jak zmieniała się śmiertelność erupcji per dekada?<br>
+                • Który typ morfologii wulkanu (Stratovolcano vs Shield) jest najbardziej aktywny?<br><br>
+                Co jest <strong>miarą</strong> (liczysz/aguegujesz)? → trafia do fact table<br>
+                Co jest <strong>kontekstem</strong> (filtrowanie/grupowanie)? → trafia do dimension
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-action">Napisz na kartce: co jest w fact_eruptions</div>
+              <div class="step-detail">
+                Klucze obce (FK) do wymiarów + miary do agregowania.<br>
+                Miary z Twoich danych: <code>vei</code>, <code>deaths_total</code>
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-action">Napisz co jest w dim_volcano, dim_location, dim_time</div>
+              <div class="step-detail">
+                dim_volcano: name, morphology, elevation<br>
+                dim_location: country, location, latitude, longitude<br>
+                dim_time: year, month, decade (wyliczone: year // 10 * 10)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" id="t4-2">
+      <div class="th" onclick="tt('t4-2')">
+        <div class="chk" onclick="td(event,'t4-2')"></div>
+        <div class="tmain"><div class="tname">Zbuduj Gold Layer w pandas</div>
+          <div class="tbrief">Silver → 4 tabele Parquet → data/gold/ — surrogate keys, denormalizacja</div>
+          <div class="ttags"><span class="tag tpandas">pandas</span><span class="tag tde">Gold layer</span></div>
+        </div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb">
+        <div class="slabel">Dokładne kroki</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-action">Dodaj <code>GOLD_DIR = Path("data/gold")</code> do config.py</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-action">Zbuduj <code>dim_location</code> — unikalne kombinacje kraj/lokalizacja/lat/lon</div>
+              <div class="step-detail">
+                <code>dim_location = df[['country', 'location', 'latitude', 'longitude']].drop_duplicates().reset_index(drop=True)</code><br>
+                <code>dim_location.index.name = 'location_id'</code> — indeks jako surrogate key
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-action">Zbuduj <code>dim_volcano</code> — unikalne wulkany z morfologią</div>
+              <div class="step-detail">
+                Unikalne kombinacje: name + morphology + elevation.<br>
+                Surrogate key jako indeks.
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-action">Zbuduj <code>dim_time</code> — unikalne lata z pochodną dekady</div>
+              <div class="step-detail">
+                <code>dim_time['decade'] = (dim_time['year'] // 10) * 10</code><br>
+                Dekada: 1980 // 10 * 10 = 1980, 1985 // 10 * 10 = 1980 — wszyscy z tej samej dekady.
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-action">Zbuduj <code>fact_eruptions</code> z FK do wymiarów</div>
+              <div class="step-detail">
+                Joinuj Silver z dim_* żeby dostać surrogate keys.<br>
+                Zachowaj: <code>location_id</code>, <code>volcano_id</code>, <code>time_id</code>, <code>vei</code>, <code>deaths_total</code>, <code>significant</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" id="t4-3">
+      <div class="th" onclick="tt('t4-3')">
+        <div class="chk" onclick="td(event,'t4-3')"></div>
+        <div class="tmain"><div class="tname">Napisz 3 zapytania analityczne na Gold Layer</div>
+          <div class="tbrief">Odpowiedz na realne pytania korzystając z fact + dims — pandas zamiast SQL</div>
+          <div class="ttags"><span class="tag tpandas">pandas</span><span class="tag tde">analityka</span></div>
+        </div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb">
+        <div class="slabel">Propozycje pytań</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">Q1</div>
+            <div class="step-body">
+              <div class="step-action">Top 10 krajów z największą liczbą erupcji o VEI ≥ 5</div>
+              <div class="step-detail">JOIN fact_eruptions z dim_location + dim_volcano, filtruj vei ≥ 5, grupuj po country, count, sort desc.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">Q2</div>
+            <div class="step-body">
+              <div class="step-action">Średnia liczba ofiar per dekada (od 1800 roku)</div>
+              <div class="step-detail">JOIN z dim_time, filtruj year ≥ 1800, grupuj po decade, mean(deaths_total), sort asc.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">Q3</div>
+            <div class="step-body">
+              <div class="step-action">Porównanie typów morfologii: ile erupcji i średnie VEI per typ</div>
+              <div class="step-detail">JOIN z dim_volcano, grupuj po morphology, count + mean(vei).</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════ -->
+<!-- FAZA 5 — PORTFOLIO                     -->
+<!-- ════════════════════════════════════════ -->
+<div class="phase col" id="ph5">
+  <div class="ph" onclick="tph('ph5')">
+    <div class="ph-icon">📋</div>
+    <div class="ph-title">Faza 5 — Dokumentacja + Portfolio</div>
+    <div class="ph-meta">0/3 · README · GitHub · CV</div>
+    <div class="ph-chev">▼</div>
+  </div>
+  <div class="ph-body">
+    <div class="task" id="t5-1">
+      <div class="th" onclick="tt('t5-1')">
+        <div class="chk" onclick="td(event,'t5-1')"></div>
+        <div class="tmain"><div class="tname">Zaktualizuj README.md</div>
+          <div class="tbrief">Architektura, jak uruchomić, źródła danych, Medallion Architecture</div>
+          <div class="ttags"><span class="tag tconcept">dokumentacja</span></div>
+        </div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb">
+        <div class="slabel">Co musi zawierać README (rekruter patrzy na to pierwsze)</div>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-action">Jednozdaniowy opis projektu</div><div class="step-detail">Co robi, jakie dane, jaka skala, jaka technologia.</div></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-action">Diagram architektury (ASCII lub Mermaid)</div><div class="step-detail">NOAA volcanoes + NOAA earthquakes → extract.py → load.py → data/raw/ → transform.py → data/clean/ → [gold/]</div></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-action">Sekcja "Data Sources" z linkami do API</div></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-body"><div class="step-action">Sekcja "How to run": python pipeline.py</div></div></div>
+          <div class="step"><div class="step-num">5</div><div class="step-body"><div class="step-action">Sekcja "Architecture" — Medallion Bronze/Silver/Gold z opisem co gdzie ląduje</div></div></div>
+          <div class="step"><div class="step-num">6</div><div class="step-body"><div class="step-action">Sekcja "Tech stack": Python, pandas, requests, pathlib, pytest</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" id="t5-2">
+      <div class="th" onclick="tt('t5-2')">
+        <div class="chk" onclick="td(event,'t5-2')"></div>
+        <div class="tmain"><div class="tname">Push na GitHub z .gitignore</div>
+          <div class="tbrief">data/ venv/ __pycache__ — nie commituj danych i środowiska</div>
+          <div class="ttags"><span class="tag tconcept">portfolio</span></div>
+        </div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb">
+        <div class="slabel">Plik .gitignore — zawartość</div>
+        <pre>data/
+venv/
+__pycache__/
+*.pyc
+*.parquet
+.DS_Store
+notebooks/</pre>
+        <div class="slabel">Dokładne kroki</div>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-action">Utwórz .gitignore w korzeniu projektu z zawartością powyżej</div></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-action">Stwórz repozytorium na GitHub (publiczne)</div></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-action">git init, git add ., git commit, git push</div></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-body"><div class="step-action">Sprawdź na GitHub że data/ nie jest w repozytorium</div><div class="step-detail">Jeśli jest — masz problem z .gitignore. Użyj git rm --cached data/ -r żeby usunąć z tracking.</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" id="t5-3">
+      <div class="th" onclick="tt('t5-3')">
+        <div class="chk" onclick="td(event,'t5-3')"></div>
+        <div class="tmain"><div class="tname">Zaktualizuj CV — sekcja Projects</div>
+          <div class="tbrief">Link do GitHub, Silver layer, testy — nowe bullet points</div>
+          <div class="ttags"><span class="tag tconcept">portfolio</span></div>
+        </div>
+        <div class="tchev">▼</div>
+      </div>
+      <div class="tb">
+        <div class="slabel">Nowe bullet points po ukończeniu Silver + testów</div>
+        <div style="font-size:.8rem;color:var(--text2);line-height:2">
+          • Implemented Silver layer transformation: column selection, null handling with domain-aware defaults (VEI null → -1, not 0), type casting, deduplication — Bronze → Silver via pandas<br>
+          • Joined multi-source hazard data via native foreign keys (volcanoEventId) — NOAA volcanoes + earthquakes, no fuzzy geographic matching required<br>
+          • Designed Bronze → Silver → Gold Medallion Architecture with full reprocessing capability from raw data<br>
+          • Unit tests with mocked HTTP requests (pytest + unittest.mock.patch) — no real API calls in test suite<br>
+          • GitHub: github.com/[username]/volcano-elt
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>Volcano ELT Pipeline · Weronika Ślusarczyk · Zaznaczone checkboxy są zapamiętywane w przeglądarce.</footer>
+
+<script>
+  function tph(id) {
+    document.getElementById(id).classList.toggle('col');
+    save();
+  }
+  function tt(id) {
+    document.getElementById(id).classList.toggle('exp');
+  }
+  function td(e, id) {
+    e.stopPropagation();
+    const t = document.getElementById(id);
+    const wasDone = t.classList.contains('done');
+    t.classList.toggle('done');
+    t.classList.remove('now');
+    t.querySelector('.chk').textContent = wasDone ? '' : '✓';
+    save();
+  }
+  function sh(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('vis');
+    el.previousElementSibling.textContent = el.classList.contains('vis') ? '🙈 Ukryj hint' : '💡 Pokaż hint';
+  }
+  function jump(id) {
+    const el = document.getElementById(id);
+    el.classList.remove('col');
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function save() {
+    const done = [...document.querySelectorAll('.task.done')].map(t => t.id);
+    const col  = [...document.querySelectorAll('.phase.col')].map(p => p.id);
+    localStorage.setItem('vr_done', JSON.stringify(done));
+    localStorage.setItem('vr_col', JSON.stringify(col));
+  }
+  function restore() {
+    const done = JSON.parse(localStorage.getItem('vr_done') || '[]');
+    const col  = JSON.parse(localStorage.getItem('vr_col')  || '["ph1","ph3","ph4","ph5"]');
+    done.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.classList.add('done'); el.classList.remove('now'); const c = el.querySelector('.chk'); if(c) c.textContent='✓'; }
+    });
+    document.querySelectorAll('.phase').forEach(p => p.classList.remove('col'));
+    col.forEach(id => { const el = document.getElementById(id); if(el) el.classList.add('col'); });
+  }
+  restore();
+</script>
+</body>
+</html>
